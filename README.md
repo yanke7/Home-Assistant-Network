@@ -4,9 +4,13 @@ A responsive Home Assistant network dashboard for internet speed, Wi-Fi device p
 
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
 
-## Configuration
+## Customize in Home Assistant
 
-Paste [dashboard.yaml](dashboard.yaml) into a new dashboard. Its single card is the configuration point. Uncomment the settings you need and substitute your own entity IDs.
+Open the dashboard, choose **Edit dashboard**, then edit the **Network Control** card. Use the visual editor to choose entities from your Home Assistant instance, change the heading, and turn sections on or off. Save the dashboard when you’re done.
+
+- **No printer?** The printer section hides automatically when it has no ink or toner sensors. To hide it even when sensors exist, open **Layout and privacy** and enable **Hide printer supplies**.
+- **Missing a sensor or control?** Choose an existing entity under the matching section. You can leave optional fields empty and hide sections you don’t use.
+- **Want an exact mapping?** The card also accepts the YAML below for imports and advanced setups. The visual editor uses the same settings.
 
 ```yaml
 type: custom:yanke-network-control
@@ -29,7 +33,7 @@ latency_max_ms: 500
 
 1. Open the install link above, or add `https://github.com/yanke7/Home-Assistant-Network` as a custom repository of type **Integration** in Marketplace or HACS. Download **Network Control**.
 2. Restart Home Assistant. In **Settings → Devices & services → Add integration**, choose **Network Control**. It loads the dashboard card automatically.
-3. Create a dashboard in **Settings → Dashboards**. Open its raw configuration editor and paste [dashboard.yaml](dashboard.yaml). Refresh the browser after setup. You can also add **Network Control** from the card picker.
+3. Create a new dashboard in **Settings → Dashboards**. Open it, choose **Edit dashboard → Add card**, then select **Network Control**. Configure the card with the visual editor and save. For the full-width panel layout, select the **Panel (1 card)** view layout or import [dashboard.yaml](dashboard.yaml). Refresh the browser if the card picker was already open before setup.
 
 For manual installation, copy `custom_components/network_control` to the same path under your Home Assistant configuration directory, then follow steps 2–3.
 

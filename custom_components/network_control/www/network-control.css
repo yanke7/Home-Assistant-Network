@@ -913,3 +913,7 @@ summary {
     animation: none;
   }
 }
+
+.main.single-column {
+  grid-template-columns: minmax(0, 1fr);
+}

@@ -25,6 +25,139 @@
     "var(--yanke-success)",
     "var(--yanke-warning)",
   ];
+  const field = (name, label, selector, helper) => ({
+    name,
+    label,
+    selector,
+    helper,
+  });
+  const entity = (name, label, domains, multiple = false, helper) =>
+    field(name, label, { entity: { domain: domains, multiple } }, helper);
+  const toggle = (name, label, helper) =>
+    field(name, label, { boolean: {} }, helper);
+  const group = (name, title, schema) => ({
+    type: "expandable",
+    name,
+    title,
+    flatten: true,
+    schema,
+  });
+
+  const form = [
+    group("layout", "Layout and privacy", [
+      field(
+        "title",
+        "Dashboard heading",
+        { text: {} },
+        "Leave blank for Network / control.",
+      ),
+      toggle("hide_connection", "Hide connection speed and history"),
+      toggle("hide_personal", "Hide personal devices"),
+      toggle(
+        "hide_printer",
+        "Hide printer supplies",
+        "Already hidden when no ink or toner sensors are found.",
+      ),
+      toggle("hide_scanner", "Hide network scanner"),
+      toggle("hide_host", "Hide host health"),
+      toggle("hide_dns", "Hide DNS and ad blocking"),
+      toggle("hide_remote", "Hide remote access and SSL"),
+      toggle("hide_controls", "Hide network controls"),
+      toggle("show_wan_ip", "Show public WAN address"),
+      toggle("show_mac", "Show device MAC addresses"),
+    ]),
+    group("internet", "Internet connection and router", [
+      field("router_name", "Router display name", { text: {} }),
+      entity("router_entity", "Router entity", [
+        "sensor",
+        "binary_sensor",
+        "device_tracker",
+      ]),
+      entity("wan_sensor", "WAN address sensor", "sensor"),
+      entity(
+        "download_sensor",
+        "Download speed sensor",
+        "sensor",
+        false,
+        "Leave blank to use the default Speedtest.net download sensor.",
+      ),
+      entity("upload_sensor", "Upload speed sensor", "sensor"),
+      entity("latency_sensor", "Latency sensor", "sensor"),
+      field(
+        "latency_max_ms",
+        "Latency chart limit",
+        {
+          number: { min: 10, step: 1, mode: "box", unit_of_measurement: "ms" },
+        },
+        "Defaults to 500 ms.",
+      ),
+      entity("speedtest_action_entity", "Run speed test button or script", [
+        "button",
+        "script",
+      ]),
+    ]),
+    group("devices", "Personal devices, printers and scanner", [
+      entity(
+        "personal_entities",
+        "Personal devices and readings",
+        ["person", "device_tracker", "sensor", "binary_sensor"],
+        true,
+        "Leave blank for automatic discovery.",
+      ),
+      entity(
+        "printer_entities",
+        "Ink and toner sensors",
+        "sensor",
+        true,
+        "Leave blank for automatic discovery.",
+      ),
+      field(
+        "scan_subnet",
+        "Scanner label",
+        { text: {} },
+        "Changes the label shown on the dashboard. Configure scanning in Nmap Tracker.",
+      ),
+    ]),
+    group("system", "Host health", [
+      entity("cpu_sensor", "CPU usage", "sensor"),
+      entity("memory_sensor", "RAM usage", "sensor"),
+      entity("disk_sensor", "Disk free space", "sensor"),
+      entity("temperature_sensor", "CPU temperature", "sensor"),
+      entity("uptime_sensor", "System uptime", "sensor"),
+    ]),
+    group("access", "DNS and remote access", [
+      entity("dns_queries_sensor", "DNS query count", "sensor"),
+      entity("dns_blocked_sensor", "Ads blocked percentage", "sensor"),
+      entity("remote_access_entity", "Remote access or VPN status", [
+        "sensor",
+        "binary_sensor",
+      ]),
+      entity("ssl_entity", "SSL certificate expiry", [
+        "sensor",
+        "binary_sensor",
+      ]),
+    ]),
+    group("control", "Network controls", [
+      entity("pihole_switch", "Pi-hole blocking switch", "switch"),
+      entity("dns_pause_script", "DNS pause script", "script"),
+      entity("router_reboot_entity", "Router reboot button or script", [
+        "button",
+        "script",
+      ]),
+      entity("guest_wifi_entity", "Guest Wi-Fi switch", "switch"),
+      entity(
+        "wake_entities",
+        "Wake-on-LAN buttons, switches or scripts",
+        ["button", "switch", "script"],
+        true,
+      ),
+      toggle("enable_restart", "Enable Home Assistant restart"),
+      entity("host_reboot_entity", "Host reboot button or script", [
+        "button",
+        "script",
+      ]),
+    ]),
+  ];
   class NetworkConsole extends HTMLElement {
     constructor() {
       super();
@@ -42,6 +175,7 @@
       this.shadowRoot.addEventListener("click", (e) => {
         const action = e.target.closest("[data-action]");
         if (action) {
+          if (this.preview) return;
           this.runAction(action);
           return;
         }
@@ -58,12 +192,38 @@
       });
     }
     setConfig(config) {
+      const scannerWasHidden = this.config?.hide_scanner;
+      const before = JSON.stringify([
+        this.speed,
+        this.latencyCap,
+        this.config?.hide_connection,
+      ]);
       this.config = config;
       this.speed = ["download_sensor", "upload_sensor", "latency_sensor"].map(
         (key, index) => config[key] || speedDefaults[index],
       );
       const cap = Number(config.latency_max_ms ?? 500);
       this.latencyCap = Number.isFinite(cap) && cap >= 10 ? cap : 500;
+      if (this.root) {
+        if (scannerWasHidden && !config.hide_scanner && !this.regOk) {
+          this.loadRegistry().then(() => this.loadActivity());
+        }
+        this.update();
+        this.renderScan(true);
+        if (
+          before !==
+          JSON.stringify([this.speed, this.latencyCap, config.hide_connection])
+        ) {
+          this.loadHistory();
+        }
+      }
+    }
+    static getConfigForm() {
+      return {
+        schema: form,
+        computeLabel: (field) => field.label,
+        computeHelper: (field) => field.helper,
+      };
     }
     static getStubConfig() {
       return { latency_max_ms: 500 };
@@ -110,7 +270,7 @@
         : "—";
     }
     build() {
-      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1>Network<span> / </span>control</h1><div class="head-right"><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main"><section class="panel hist"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side"><section class="panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan"><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
+      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network<span> / </span>control</h1><div class="head-right"><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner"><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
         ["online", "Online", "ok"],
         ["offline", "Dropped off", "warn"],
         ["unnamed", "Unnamed", ""],
@@ -121,11 +281,11 @@
         )
         .join(
           "",
-        )}</div><div class="scanbar"><div class="tabs"><button data-tab="devices" class="on">Devices</button><button data-tab="activity">Activity</button></div><input class="search" id="scansearch" type="search" placeholder="Filter devices" aria-label="Filter devices"></div><div id="pending"></div><div class="scanlist" id="scanlist"><div class="none">Loading devices…</div></div><div class="scanfoot"><span id="scanfoot"></span><span id="scanerr"></span></div></section><div class="support">
- <section class="panel"><div class="heading"><h2>Host health</h2></div><div id="host" class="readings"></div></section>
- <section class="panel"><div class="heading"><h2>DNS &amp; ad blocking</h2></div><div id="dns" class="readings"></div></section>
- <section class="panel"><div class="heading"><h2>Remote access &amp; SSL</h2></div><div id="remote" class="readings"></div></section>
- <section class="panel"><div class="heading"><h2>Network controls</h2></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
+        )}</div><div class="scanbar"><div class="tabs"><button data-tab="devices" class="on">Devices</button><button data-tab="activity">Activity</button></div><input class="search" id="scansearch" type="search" placeholder="Filter devices" aria-label="Filter devices"></div><div id="pending"></div><div class="scanlist" id="scanlist"><div class="none">Loading devices…</div></div><div class="scanfoot"><span id="scanfoot"></span><span id="scanerr"></span></div></section><div class="support" id="support">
+ <section class="panel" id="host-panel"><div class="heading"><h2>Host health</h2></div><div id="host" class="readings"></div></section>
+ <section class="panel" id="dns-panel"><div class="heading"><h2>DNS &amp; ad blocking</h2></div><div id="dns" class="readings"></div></section>
+ <section class="panel" id="remote-panel"><div class="heading"><h2>Remote access &amp; SSL</h2></div><div id="remote" class="readings"></div></section>
+ <section class="panel" id="actions-panel"><div class="heading"><h2>Network controls</h2></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
  </div></div></div></div>`;
       this.root = this.shadowRoot;
       this.root.getElementById("scansearch").addEventListener("input", (e) => {
@@ -194,6 +354,30 @@
     }
     update() {
       const config = this.config;
+      const hide = (id, hidden) => {
+        this.root.getElementById(id).hidden = Boolean(hidden);
+      };
+      this.renderMarkup(
+        "dashboard-title",
+        config.title?.trim()
+          ? esc(config.title.trim())
+          : "Network<span> / </span>control",
+      );
+      hide("speed-metrics", config.hide_connection);
+      hide("history", config.hide_connection);
+      hide("personal-panel", config.hide_personal);
+      hide("scanner", config.hide_scanner);
+      hide("host-panel", config.hide_host);
+      hide("dns-panel", config.hide_dns);
+      hide("remote-panel", config.hide_remote);
+      hide("actions-panel", config.hide_controls);
+      hide(
+        "support",
+        config.hide_host &&
+          config.hide_dns &&
+          config.hide_remote &&
+          config.hide_controls,
+      );
       const ids = Object.keys(this._hass.states);
       const routerId =
         config.wan_sensor ||
@@ -215,6 +399,8 @@
       this.root.getElementById("ip").textContent =
         config.show_wan_ip && available(wan) ? "WAN / " + wan.state : "";
       this.speed.forEach((id, index) => {
+        this.root.getElementById("v" + index).closest("button").dataset.entity =
+          id;
         this.root.getElementById("v" + index).textContent = this.value(
           id,
           index === 2 ? 0 : 1,
@@ -243,7 +429,18 @@
         ids.filter((id) =>
           /^sensor\..*_(ink|toner)(?:_(remaining|level))?$/.test(id),
         );
-      this.root.getElementById("printers").hidden = !supplies.length;
+      const printerHidden =
+        config.hide_printer || !supplies.some((id) => this.state(id));
+      const sideHidden = config.hide_personal && printerHidden;
+      hide("printers", printerHidden);
+      hide("side", sideHidden);
+      hide("main", config.hide_connection && sideHidden);
+      this.root
+        .getElementById("main")
+        .classList.toggle(
+          "single-column",
+          Boolean(sideHidden || config.hide_connection),
+        );
       this.rows(
         "supplies",
         supplies.map((id) => [null, id]),
@@ -413,14 +610,27 @@
       }
     }
     async loadHistory() {
-      if (this.loading) return;
+      if (this.config.hide_connection) {
+        this.historyRequest = null;
+        return;
+      }
+      const key = JSON.stringify([this.speed, this.latencyCap]);
+      if (this.historyRequest?.key === key) return;
+      this.historyRequest = null;
+      const note = this.root.getElementById("chartnote");
+      const axis = [0, 1, 2, 3].map((i) => this.root.getElementById("yl" + i));
       const active = this.speed.filter((id) => this.state(id));
       if (!active.length) {
         this.root.getElementById("plot").innerHTML =
           '<div class="empty">Entity not configured</div>';
+        axis.forEach((label) => {
+          label.textContent = "";
+        });
+        note.textContent = "";
         return;
       }
-      this.loading = true;
+      const request = { key };
+      this.historyRequest = request;
       let end = Date.now(),
         start = end - 86400000;
       try {
@@ -428,6 +638,7 @@
           "GET",
           `history/period/${new Date(start).toISOString()}?filter_entity_id=${encodeURIComponent(active.join(","))}&end_time=${new Date(end).toISOString()}&minimal_response&no_attributes`,
         );
+        if (this.historyRequest !== request) return;
         const series = this.speed.map((id, i) =>
           (rows.find((r) => r[0]?.entity_id === id) || [])
             .map((r) => ({
@@ -485,16 +696,21 @@
           this.latencyCap +
           " ms omitted";
       } catch (e) {
+        if (this.historyRequest !== request) return;
+        axis.forEach((label) => {
+          label.textContent = "";
+        });
         this.root.getElementById("plot").innerHTML =
           '<div class="empty">History unavailable</div>';
         this.root.getElementById("chartnote").textContent =
           "Latest readings remain above. History retries every 5 minutes.";
       } finally {
-        this.loading = false;
+        if (this.historyRequest === request) this.historyRequest = null;
       }
     }
     /* ---------- Network scanner (Nmap Tracker entities) ---------- */
     async loadRegistry() {
+      if (this.config.hide_scanner) return;
       try {
         const all = await this._hass.callWS({
           type: "config/entity_registry/list",
@@ -626,7 +842,7 @@
       );
     }
     renderScan(force) {
-      if (!this.root || !this._hass) return;
+      if (!this.root || !this._hass || this.config.hide_scanner) return;
       const list = this.root.getElementById("scanlist");
       if (!list) return;
       if (this.scan.editing && !force) return;
@@ -764,6 +980,7 @@
         }, 8000);
     }
     async saveName(id, value) {
+      if (this.preview) return;
       const name = String(value).trim() || null;
       try {
         const res = await this._hass.callWS({
@@ -786,6 +1003,7 @@
       this.renderScan(true);
     }
     async track(which) {
+      if (this.preview) return;
       await this.loadRegistry();
       if (!this.regOk) {
         this.note("Could not verify which devices are eligible for tracking.");
@@ -850,6 +1068,7 @@
       );
     }
     async loadActivity() {
+      if (this.config.hide_scanner) return;
       if (!this._hass || !this.regOk) return;
       const ids = Object.keys(this.reg).filter(
         (id) => !this.reg[id].disabled_by,
@@ -915,6 +1134,9 @@
       type: "yanke-network-control",
       name: "Network Control",
       description: "Network history, presence and infrastructure controls",
+      preview: true,
+      documentationURL:
+        "https://github.com/yanke7/Home-Assistant-Network#customize-in-home-assistant",
     });
   }
 })();
