@@ -1272,3 +1272,18 @@ summary {
   height:100%;
 }
 .instrument-4 .instrument-plot {height:24px}
+
+.host-tooltip {
+  position:fixed;
+  z-index:10;
+  pointer-events:none;
+  max-width:calc(100vw - 16px);
+  padding:7px 9px;
+  border:1px solid var(--yanke-accent);
+  border-radius:6px;
+  color:var(--yanke-text);
+  background:var(--yanke-bg);
+  box-shadow:0 4px 16px #0007;
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+}

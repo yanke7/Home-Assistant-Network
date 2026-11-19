@@ -340,6 +340,7 @@
  </div></div></div></div>`;
       this.root = this.shadowRoot;
       this.setupThemes();
+      this.setupHostTooltip();
       this.root.getElementById("scansearch").addEventListener("input", (e) => {
         this.scan.q = e.target.value.trim().toLowerCase();
         this.renderScan(true);
@@ -618,6 +619,39 @@
         hostHidden && dnsHidden && remoteHidden && controlsHidden,
       );
     }
+    setupHostTooltip() {
+      const host = this.root.getElementById("host");
+      const tooltip = document.createElement("div");
+      tooltip.className = "host-tooltip";
+      tooltip.hidden = true;
+      tooltip.setAttribute("role", "tooltip");
+      this.root.querySelector(".shell").append(tooltip);
+      host.addEventListener("pointermove", (event) => {
+        const plot = event.target.closest(".instrument-plot");
+        const id = plot?.closest("[data-entity]")?.dataset.entity;
+        const history = this.hostHistory;
+        const samples = history?.samples?.[id];
+        if (!samples?.length) {
+          tooltip.hidden = true;
+          return;
+        }
+        const rect = plot.getBoundingClientRect();
+        const fraction = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+        const target = history.start + fraction * 86400000;
+        const sample = samples.reduce((nearest, point) =>
+          Math.abs(point.time - target) < Math.abs(nearest.time - target) ? point : nearest);
+        const label = plot.closest("button").querySelector(".instrument-label").textContent;
+        const unit = this.state(id)?.attributes.unit_of_measurement;
+        const value = sample.duration
+          ? `${Math.floor(sample.value * 60)} min uptime`
+          : sample.raw + (unit === "%" ? "%" : unit ? " " + unit : "");
+        tooltip.textContent = `${label} · ${value} · ${new Date(sample.time).toLocaleString()}`;
+        tooltip.hidden = false;
+        tooltip.style.left = Math.max(8, Math.min(event.clientX + 12, window.innerWidth - tooltip.offsetWidth - 8)) + "px";
+        tooltip.style.top = Math.max(8, rect.top - tooltip.offsetHeight - 5) + "px";
+      });
+      host.addEventListener("pointerleave", () => { tooltip.hidden = true; });
+    }
     renderHostHealth(rows) {
       const ids = rows.map(([, id]) => id).filter((id) => this.state(id));
       const key = ids.join(",");
@@ -658,6 +692,7 @@
       const end = Date.now();
       const start = end - 86400000;
       const series = {};
+      const samples = {};
       try {
         const rows = await this._hass.callApi("GET", `history/period/${new Date(start).toISOString()}?filter_entity_id=${encodeURIComponent(ids.join(","))}&end_time=${new Date(end).toISOString()}&minimal_response&no_attributes`);
         for (const records of rows) {
@@ -668,6 +703,11 @@
             const value = record.state?.trim() ? Number(record.state) : NaN;
             const boot = Date.parse(record.state);
             return [time, Number.isFinite(value) ? value : (time - boot) / 3600000];
+          });
+          samples[id] = points.flatMap(([time, value], index) => {
+            if (!Number.isFinite(time + value)) return [];
+            const raw = records[index].state;
+            return [{ time, value, raw, duration: !Number.isFinite(Number(raw)) }];
           });
           if (points.length && Number.isFinite(points.at(-1)[1])) {
             const boot = Date.parse(records.at(-1).state);
@@ -687,7 +727,7 @@
         }
       } catch { /* Keep the live gauges usable when Recorder history is unavailable. */ }
       if (this.hostHistoryKey !== key) return;
-      this.hostHistory = { key, series };
+      this.hostHistory = { key, series, samples, start };
       this.update();
     }
     actions() {
