@@ -372,6 +372,12 @@
         sig: "",
       };
       this.shadowRoot.addEventListener("click", (e) => {
+        const shortcut = e.target.closest("[data-network-shortcut]");
+        if (shortcut) {
+          if (!this.preview && !this.dashboardEditor())
+            this.runShortcut(shortcut.dataset.networkShortcut);
+          return;
+        }
         const action = e.target.closest("[data-action]");
         if (action) {
           if (this.preview || this.dashboardEditor()) return;
@@ -997,7 +1003,7 @@
       this.renderActions();
       const controlsHidden = this.sectionHidden(
         "controls",
-        this.availableActions.length > 0,
+        this.availableActions.length > 0 || this.shortcuts().length > 0,
       );
       hide("actions-panel", controlsHidden);
       hide(
@@ -1069,16 +1075,67 @@
         entityAction("Reboot host", config.host_reboot_entity, true);
       return actions;
     }
+    shortcuts() {
+      const shortcuts = [];
+      if (this.speed.some((id) => this.state(id))) {
+        shortcuts.push(["snapshot", "Connection snapshot", "mdi:clipboard-pulse-outline"]);
+        if (this.mode("connection") !== "never")
+          shortcuts.push(["refresh", "Refresh history", "mdi:chart-timeline-variant"]);
+      }
+      const hasDevices = Object.keys(this.reg).length > 0 ||
+        Object.values(this._hass.entities || {}).some((entity) => entity.platform === "nmap_tracker");
+      if (!this.sectionHidden("scanner", hasDevices)) {
+        shortcuts.push(["find", "Find a device", "mdi:magnify"]);
+        shortcuts.push(["activity", "Recent activity", "mdi:timeline-clock-outline"]);
+      }
+      return shortcuts;
+    }
+
+    async runShortcut(shortcut) {
+      if (shortcut === "refresh") {
+        this.historyRequest = null;
+        await this.loadHistory();
+        this.root.getElementById("history").scrollIntoView({ block: "nearest" });
+        return;
+      }
+      if (shortcut === "snapshot") {
+        const dialog = document.createElement("dialog");
+        dialog.className = "theme-dialog snapshot-dialog";
+        dialog.setAttribute("aria-label", "Connection snapshot");
+        dialog.innerHTML = '<div class="theme-heading"><strong>Connection snapshot</strong><form method="dialog"><button autofocus>Close</button></form></div><textarea readonly aria-label="Connection summary"></textarea><button type="button" class="select-summary">Select summary</button>';
+        const summary = dialog.querySelector("textarea");
+        const labels = ["Download", "Upload", "Latency"];
+        summary.value = [new Date().toLocaleString(), ...this.speed.map((id, index) => {
+          const value = this.value(id, index === 2 ? 0 : 1);
+          return `${labels[index]}: ${value === "—" ? "No reading" : value + (index === 2 ? " ms" : " Mbps")}`;
+        })].join("\n");
+        dialog.querySelector(".select-summary").onclick = () => { summary.focus(); summary.select(); };
+        const trigger = this.root.querySelector('[data-network-shortcut="snapshot"]');
+        dialog.addEventListener("close", () => { dialog.remove(); trigger?.focus(); }, { once: true });
+        this.root.querySelector(".shell").append(dialog);
+        dialog.showModal();
+        return;
+      }
+      const scanner = this.root.getElementById("scanner");
+      if (scanner.hidden) return;
+      const tab = shortcut === "activity" ? "activity" : "devices";
+      scanner.querySelector(`[data-tab="${tab}"]`).click();
+      scanner.scrollIntoView({ block: "nearest" });
+      (tab === "devices" ? this.root.getElementById("scansearch") : scanner.querySelector('[data-tab="activity"]')).focus();
+    }
+
     renderActions() {
       this.availableActions = this.actions();
-      const html =
+      const shortcuts = this.shortcuts().map(([id, label, icon]) =>
+        `<button type="button" data-network-shortcut="${id}"><ha-icon icon="${icon}" aria-hidden="true"></ha-icon>${label}</button>`).join("");
+      const serviceButtons =
         this.availableActions
           .map((action, index) => {
             const active = this.activeAction === action.label;
             return `<button data-action="${index}" ${this.activeAction ? "disabled" : ""}>${active ? '<span class="spinner" aria-hidden="true"></span>' : ""}${esc(active ? action.label + "…" : action.label)}</button>`;
           })
-          .join("") || '<div class="hint">No network controls configured</div>';
-      this.renderMarkup("actions", html);
+          .join("");
+      this.renderMarkup("actions", shortcuts + serviceButtons || '<div class="hint">No network controls configured</div>');
     }
     async runAction(button) {
       const action = this.availableActions[Number(button.dataset.action)];
@@ -1224,6 +1281,7 @@
       } catch (e) {
         this.regOk = false;
       }
+      this.update();
       this.renderScan(true);
     }
     scanModel() {

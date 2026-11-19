@@ -1093,3 +1093,30 @@ summary {
 .theme-choices button { display:flex; align-items:center; text-align:left; gap:7px }
 .theme-choices button[aria-pressed="true"] { outline:2px solid var(--yanke-accent); outline-offset:-2px }
 .theme-choices span { width:20px; height:20px; flex:none; border:1px solid var(--yanke-line); border-radius:4px; background:linear-gradient(140deg,var(--swatch-bg) 60%,var(--swatch-accent) 61%) }
+
+.actions:has([data-network-shortcut]) {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+}
+.actions [data-network-shortcut] {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 6px;
+  min-height:32px;
+  line-height:1.15;
+}
+.actions ha-icon {
+  --mdc-icon-size:16px;
+  flex:none;
+  color:var(--yanke-accent);
+}
+.snapshot-dialog textarea {
+  width:100%;
+  min-height:112px;
+  margin:10px 0;
+  padding:8px;
+  background:var(--yanke-bg);
+  color:var(--yanke-text);
+  border:1px solid var(--yanke-line);
+  border-radius:6px;
+}
