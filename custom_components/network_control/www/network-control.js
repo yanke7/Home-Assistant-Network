@@ -205,13 +205,14 @@
         if (this.theme === "appearance" && this._hass)
           window.YankeAppearance?.apply(this.root?.querySelector(".shell"), this._hass);
       };
-      this.panelPreferencesKey = "network-control.panels:" + location.pathname;
+      const legacyKey = "network-control.panels:" + location.pathname;
+      this.legacyPanelPreferences = {};
       this.panelPreferences = {};
       try {
-        const saved = JSON.parse(localStorage.getItem(this.panelPreferencesKey));
+        const saved = JSON.parse(localStorage.getItem(legacyKey));
         for (const panel of ["personal", "controls"]) {
           if (Array.isArray(saved?.[panel]))
-            this.panelPreferences[panel] = saved[panel].filter((id) => typeof id === "string");
+            this.legacyPanelPreferences[panel] = saved[panel].filter((id) => typeof id === "string");
         }
       } catch { /* Default to discovery when saved preferences are unavailable. */ }
       this.reg = {};
@@ -262,6 +263,7 @@
         this.mode("connection"),
       ]);
       this.config = config;
+      this.panelPreferences = config.panel_preferences ?? this.legacyPanelPreferences;
       this.selectSpeedSensors();
       const cap = Number(config.latency_max_ms ?? 500);
       this.latencyCap = Number.isFinite(cap) && cap >= 10 ? cap : 500;
@@ -558,6 +560,9 @@
         this.historyVisibilityKey = historyKey;
         this.loadHistory();
       }
+      const canManage = Boolean(this.dashboardCard());
+      for (const button of this.root.querySelectorAll("[data-manage-panel]"))
+        button.hidden = !canManage;
       const ids = Object.keys(this._hass.states);
       const routerId =
         config.wan_sensor ||
@@ -936,6 +941,37 @@
       return `service:${action.domain}.${action.service}:${action.target || ""}:${action.label}`;
     }
 
+    dashboardCard() {
+      if (this.preview || !this._hass?.user?.is_admin) return null;
+      for (let node = this.parentNode; node; node = node.parentNode || node.host) {
+        if (node.localName !== "hui-panel-view") continue;
+        const { lovelace } = node;
+        if (lovelace?.mode !== "storage") return null;
+        const viewIndex = node.path?.[1] ?? node.index;
+        const cards = lovelace.rawConfig?.views?.[viewIndex]?.cards;
+        const card = cards?.[0];
+        if (cards?.length !== 1 || card?.type !== "custom:yanke-network-control") return null;
+        return { lovelace, viewIndex, card };
+      }
+      return null;
+    }
+
+    async savePanelPreferences(panel, selected) {
+      const context = this.dashboardCard();
+      if (!context) throw Error("Dashboard settings are unavailable.");
+      const { lovelace, viewIndex, card } = context;
+      const latest = await this._hass.callWS({ type: "lovelace/config", url_path: lovelace.urlPath });
+      const cards = latest.views?.[viewIndex]?.cards;
+      if (cards?.length !== 1 || JSON.stringify(cards[0]) !== JSON.stringify(card))
+        throw Error("The dashboard changed. Close this window and try again.");
+      const preferences = { ...(card.panel_preferences ?? this.legacyPanelPreferences) };
+      if (selected === null) delete preferences[panel];
+      else preferences[panel] = selected;
+      cards[0] = { ...cards[0], panel_preferences: preferences };
+      await lovelace.saveConfig(latest);
+      if (this.isConnected) this.setConfig(cards[0]);
+    }
+
     managePanel(trigger) {
       const panel = trigger.dataset.managePanel;
       const personal = panel === "personal";
@@ -965,7 +1001,7 @@
       dialog.innerHTML = `<div class="theme-heading"><strong>${title}</strong></div>
         <input type="search" autofocus aria-label="Find an entity or control" placeholder="Search names or entity IDs">
         <div class="manage-choices"></div>
-        <div class="manage-footer"><button type="button" data-reset>Restore defaults</button><button type="button" data-cancel>Cancel</button><button type="button" data-save>Save</button></div>`;
+        <div role="status" class="manage-status"></div><div class="manage-footer"><button type="button" data-reset>Restore defaults</button><button type="button" data-cancel>Cancel</button><button type="button" data-save>Save</button></div>`;
       const search = dialog.querySelector("input");
       const list = dialog.querySelector(".manage-choices");
       const sorted = [...choices].sort(([a, aLabel], [b, bLabel]) =>
@@ -981,13 +1017,18 @@
         if (checked) selected.add(value);
         else selected.delete(value);
       });
-      const save = (reset) => {
-        if (reset) delete this.panelPreferences[panel];
-        else this.panelPreferences[panel] = [...selected];
-        try { localStorage.setItem(this.panelPreferencesKey, JSON.stringify(this.panelPreferences)); }
-        catch { /* Keep the preferences for this page. */ }
-        this.update();
-        dialog.close();
+      const save = async (reset) => {
+        const buttons = dialog.querySelectorAll("button");
+        const status = dialog.querySelector(".manage-status");
+        buttons.forEach((button) => { button.disabled = true; });
+        status.textContent = "Saving to dashboard…";
+        try {
+          await this.savePanelPreferences(panel, reset ? null : [...selected]);
+          dialog.close();
+        } catch (error) {
+          status.textContent = error?.message || "Could not save dashboard settings.";
+          buttons.forEach((button) => { button.disabled = false; });
+        }
       };
       search.addEventListener("input", render);
       dialog.querySelector("[data-reset]").onclick = () => save(true);
