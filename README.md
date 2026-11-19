@@ -8,7 +8,8 @@ A responsive Home Assistant network dashboard for internet speed, Wi-Fi device p
 
 Open the dashboard, choose **Edit dashboard**, then edit the **Network Control** card. Use the visual editor to choose entities from your Home Assistant instance, change the heading, and choose when each optional section appears. Save the dashboard when you’re done.
 
-- **Section order** lets you drag sections into place or use the up and down buttons. Hidden sections keep their position. Choose **Reset to default order** to restore the original layout.
+- **Edit dashboard** reveals drag handles on the sections of storage-mode dashboards. Drag the visible sections or use their arrow buttons, then choose **Save order**.
+- The card editor’s **Section order** also lets you drag sections into place or use the up and down buttons. Hidden sections keep their position. Choose **Reset to default order** to restore the original layout.
 - **Layout and privacy** gives each optional section three choices. **Automatic** hides sections with no matching entities or controls. **Always show** displays the section and its empty state. **Hide** keeps it off the dashboard. Existing hide settings carry forward until you choose a new mode.
 - **Missing a sensor or control?** Choose an existing entity under the matching section. You can leave optional fields empty and hide sections you don’t use.
 - **Want an exact mapping?** The card also accepts the YAML below for imports and advanced setups. The visual editor uses the same settings.

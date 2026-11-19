@@ -355,7 +355,7 @@
       this.shadowRoot.addEventListener("click", (e) => {
         const action = e.target.closest("[data-action]");
         if (action) {
-          if (this.preview) return;
+          if (this.preview || this.dashboardEditor()) return;
           this.runAction(action);
           return;
         }
@@ -431,6 +431,7 @@
       this.renderScan();
     }
     connectedCallback() {
+      if (this.root) this.applyOrder();
       this.timer = setInterval(() => {
         if (this._hass) {
           this.loadHistory();
@@ -558,11 +559,167 @@
       if (!hidden) this.rows(target, hasContent ? rows : []);
       return hidden;
     }
+    dashboardEditor() {
+      if (this.preview) return null;
+      for (
+        let node = this.parentNode;
+        node;
+        node = node.parentNode || node.host
+      ) {
+        if (node.localName !== "hui-card-options") continue;
+        const { lovelace, path } = node;
+        if (!lovelace?.editMode || lovelace.mode !== "storage" || !path?.length)
+          return null;
+        const [view, first, second] = path;
+        const cardPath =
+          typeof view !== "number"
+            ? path
+            : path.length === 2
+              ? ["views", view, "cards", first]
+              : ["views", view, "sections", first, "cards", second];
+        const config = cardPath.reduce(
+          (value, key) => value?.[key],
+          lovelace.rawConfig,
+        );
+        if (config?.type !== "custom:yanke-network-control") return null;
+        return { lovelace, cardPath, config };
+      }
+      return null;
+    }
+
+    beginInlineOrder() {
+      const editor = this.dashboardEditor();
+      if (!editor) return;
+      this.inlineOrder = normalizeOrder(this.config.section_order);
+      this.inlineBase = JSON.stringify(editor.config);
+    }
+
+    moveInlineSection(id, target, after) {
+      if (!id || id === target || this.savingOrder) return;
+      if (!this.inlineOrder) this.beginInlineOrder();
+      if (!this.inlineOrder) return;
+      const next = this.inlineOrder.filter((section) => section !== id);
+      const index = next.indexOf(target);
+      if (index < 0) return;
+      next.splice(index + Number(after), 0, id);
+      this.inlineOrder = next;
+      this.applyOrder();
+      this.orderStatus.textContent = `${sections[id].label} moved to position ${next.indexOf(id) + 1}.`;
+    }
+
+    clearInlineDrag() {
+      this.inlineDragged = null;
+      this.orderGrid
+        .querySelector(".drop-before, .drop-after")
+        ?.classList.remove("drop-before", "drop-after");
+    }
+
+    bindInlineOrder() {
+      this.orderGrid.addEventListener("dragstart", (event) => {
+        const grip = event.target.closest(".section-grip");
+        if (!grip || !this.dashboardEditor() || this.savingOrder) return;
+        this.inlineDragged = grip.closest(".ordered-section").dataset.section;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", this.inlineDragged);
+      });
+      const dropTarget = (event) => event.target.closest(".ordered-section");
+      const after = (event, row) => {
+        const box = row.getBoundingClientRect();
+        return event.clientY >= box.top + box.height / 2;
+      };
+      this.orderGrid.addEventListener("dragover", (event) => {
+        const row = dropTarget(event);
+        if (!this.inlineDragged || !row) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        this.orderGrid
+          .querySelector(".drop-before, .drop-after")
+          ?.classList.remove("drop-before", "drop-after");
+        row.classList.add(after(event, row) ? "drop-after" : "drop-before");
+      });
+      this.orderGrid.addEventListener("drop", (event) => {
+        const row = dropTarget(event);
+        if (!this.inlineDragged || !row) return;
+        event.preventDefault();
+        this.moveInlineSection(
+          this.inlineDragged,
+          row.dataset.section,
+          after(event, row),
+        );
+        this.clearInlineDrag();
+      });
+      this.orderGrid.addEventListener("dragend", () => this.clearInlineDrag());
+      this.orderGrid.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-order-step]");
+        if (!button || !this.dashboardEditor()) return;
+        const id = button.closest(".ordered-section").dataset.section;
+        const visible = Array.from(this.orderGrid.children).filter((row) =>
+          row.checkVisibility(),
+        );
+        const next =
+          visible[
+            visible.findIndex((row) => row.dataset.section === id) +
+              Number(button.dataset.orderStep)
+          ];
+        if (next) {
+          this.moveInlineSection(
+            id,
+            next.dataset.section,
+            Number(button.dataset.orderStep) > 0,
+          );
+          button.focus();
+        }
+      });
+    }
+
+    async saveInlineOrder() {
+      const editor = this.dashboardEditor();
+      if (!editor || !this.inlineOrder || this.savingOrder) return;
+      this.savingOrder = true;
+      this.applyOrder();
+      try {
+        const latest = await this._hass.callWS({
+          type: "lovelace/config",
+          url_path: editor.lovelace.urlPath,
+        });
+        const parent = editor.cardPath
+          .slice(0, -1)
+          .reduce((value, key) => value?.[key], latest);
+        const index = editor.cardPath.at(-1);
+        const current = this.dashboardEditor();
+        if (
+          !current ||
+          JSON.stringify(current.cardPath) !==
+            JSON.stringify(editor.cardPath) ||
+          JSON.stringify(parent?.[index]) !== this.inlineBase
+        ) {
+          throw new Error("The card changed. Cancel and try again.");
+        }
+        // Merge into the latest dashboard and let Home Assistant refresh its editor.
+        parent[index] = {
+          ...parent[index],
+          section_order: [...this.inlineOrder],
+        };
+        await current.lovelace.saveConfig(latest);
+        this.inlineOrder = null;
+        this.orderStatus.textContent = "Order saved.";
+      } catch (error) {
+        this.orderStatus.textContent =
+          error?.message || "Could not save the order.";
+      } finally {
+        this.savingOrder = false;
+        this.applyOrder();
+      }
+    }
     applyOrder() {
-      const order = this.config.section_order
-        ? normalizeOrder(this.config.section_order)
-        : null;
-      const key = JSON.stringify(order);
+      const editing = Boolean(this.dashboardEditor());
+      if (!editing) this.inlineOrder = null;
+      const order =
+        editing || this.config.section_order
+          ? this.inlineOrder || normalizeOrder(this.config.section_order)
+          : null;
+      const key = JSON.stringify([order, editing]);
+      if (this.orderGrid) this.updateOrderToolbar(editing);
       if (key === this.orderKey) return;
       this.orderKey = key;
       if (!this.orderGrid && !order) return;
@@ -570,6 +727,23 @@
         this.orderGrid = document.createElement("div");
         this.orderGrid.className = "ordered-grid";
         this.root.querySelector(".grid").after(this.orderGrid);
+        this.orderToolbar = document.createElement("div");
+        this.orderToolbar.className = "order-toolbar";
+        this.orderToolbar.innerHTML =
+          '<span>Drag sections to reorder</span><button type="button" data-save-order>Save order</button><button type="button" data-cancel-order>Cancel changes</button><span role="status"></span>';
+        this.orderGrid.before(this.orderToolbar);
+        this.orderStatus = this.orderToolbar.querySelector('[role="status"]');
+        this.orderToolbar
+          .querySelector("[data-save-order]")
+          .addEventListener("click", () => this.saveInlineOrder());
+        this.orderToolbar
+          .querySelector("[data-cancel-order]")
+          .addEventListener("click", () => {
+            this.inlineOrder = null;
+            this.orderStatus.textContent = "";
+            this.applyOrder();
+          });
+        this.bindInlineOrder();
         this.orderedSections = Object.fromEntries(
           defaultOrder.map((id) => {
             const { panels, wide } = sections[id];
@@ -578,6 +752,11 @@
               ? "ordered-section wide-section"
               : "ordered-section";
             wrapper.dataset.section = id;
+            const handle = document.createElement("div");
+            handle.className = "section-order-handle";
+            const label = esc(sections[id].label);
+            handle.innerHTML = `<span class="section-grip" draggable="true" title="Drag ${label}">⠿ ${label}</span><button type="button" data-order-step="-1" aria-label="Move ${label} up">↑</button><button type="button" data-order-step="1" aria-label="Move ${label} down">↓</button>`;
+            wrapper.append(handle);
             const entries = panels.map((panel) => {
               const node = this.root.getElementById(panel);
               const anchor = document.createComment(panel);
@@ -588,6 +767,8 @@
           }),
         );
       }
+      this.updateOrderToolbar(editing);
+      this.orderGrid.classList.toggle("inline-edit", editing);
       this.root.querySelector(".grid").hidden = Boolean(order);
       this.orderGrid.hidden = !order;
       if (!order) {
@@ -600,6 +781,11 @@
         for (const { node } of entries) wrapper.append(node);
         this.orderGrid.append(wrapper);
       }
+    }
+    updateOrderToolbar(editing) {
+      this.orderToolbar.hidden = !editing;
+      for (const button of this.orderToolbar.querySelectorAll("button"))
+        button.disabled = !this.inlineOrder || this.savingOrder;
     }
     update() {
       this.applyOrder();
@@ -1246,7 +1432,7 @@
         }, 8000);
     }
     async saveName(id, value) {
-      if (this.preview) return;
+      if (this.preview || this.dashboardEditor()) return;
       const name = String(value).trim() || null;
       try {
         const res = await this._hass.callWS({
@@ -1269,7 +1455,7 @@
       this.renderScan(true);
     }
     async track(which) {
-      if (this.preview) return;
+      if (this.preview || this.dashboardEditor()) return;
       await this.loadRegistry();
       if (!this.regOk) {
         this.note("Could not verify which devices are eligible for tracking.");

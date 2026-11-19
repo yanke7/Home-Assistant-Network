@@ -928,9 +928,6 @@ summary {
   gap: 16px;
   min-width: 0;
 }
-.ordered-section:not(:has(> :not([hidden]))) {
-  display: none;
-}
 .wide-section {
   grid-column: 1 / -1;
 }
@@ -938,4 +935,52 @@ summary {
   .ordered-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.order-toolbar,
+.inline-edit .section-order-handle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--yanke-line);
+  border-radius: 8px;
+  background: var(--yanke-surface);
+}
+.order-toolbar {
+  margin-bottom: 16px;
+}
+.order-toolbar button,
+.section-order-handle button {
+  border: 1px solid var(--yanke-line);
+  background: var(--yanke-raised);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.order-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.section-order-handle {
+  display: none;
+}
+.section-grip {
+  cursor: grab;
+  flex: 1;
+  user-select: none;
+}
+.inline-edit {
+  grid-template-columns: minmax(0, 1fr);
+}
+.inline-edit .drop-before {
+  outline: 2px solid var(--yanke-accent);
+  outline-offset: 3px;
+}
+.inline-edit .drop-after {
+  outline: 2px dashed var(--yanke-accent);
+  outline-offset: 3px;
+}
+.ordered-section:not(:has(> :not([hidden], .section-order-handle))) {
+  display: none;
 }
