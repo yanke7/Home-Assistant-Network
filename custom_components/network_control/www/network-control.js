@@ -59,6 +59,28 @@
     schema,
   });
 
+  const sections = {
+    connection: {
+      label: "Connection speed and history",
+      panels: ["speed-metrics", "history"],
+      wide: true,
+    },
+    personal: { label: "Personal devices", panels: ["personal-panel"] },
+    printer: { label: "Printer supplies", panels: ["printers"] },
+    scanner: { label: "Network scanner", panels: ["scanner"], wide: true },
+    host: { label: "Host health", panels: ["host-panel"] },
+    dns: { label: "DNS and ad blocking", panels: ["dns-panel"] },
+    remote: { label: "Remote access and SSL", panels: ["remote-panel"] },
+    controls: { label: "Network controls", panels: ["actions-panel"] },
+  };
+  const defaultOrder = Object.keys(sections);
+  function normalizeOrder(order) {
+    const saved = Array.isArray(order)
+      ? order.filter((id) => defaultOrder.includes(id))
+      : [];
+    return [...new Set([...saved, ...defaultOrder])];
+  }
+
   const form = [
     group("layout", "Layout and privacy", [
       field(
@@ -67,14 +89,7 @@
         { text: {} },
         "Leave blank for Network / control.",
       ),
-      visibility("connection", "Connection speed and history"),
-      visibility("personal", "Personal devices"),
-      visibility("printer", "Printer supplies"),
-      visibility("scanner", "Network scanner"),
-      visibility("host", "Host health"),
-      visibility("dns", "DNS and ad blocking"),
-      visibility("remote", "Remote access and SSL"),
-      visibility("controls", "Network controls"),
+      ...defaultOrder.map((id) => visibility(id, sections[id].label)),
       toggle("show_wan_ip", "Show public WAN address"),
       toggle("show_mac", "Show device MAC addresses"),
     ]),
@@ -170,6 +185,159 @@
       ]),
     ]),
   ];
+  class NetworkControlEditor extends HTMLElement {
+    constructor() {
+      super();
+      const root = this.attachShadow({ mode: "open" });
+      root.innerHTML = `
+        <style>
+          :host { display: block; }
+          details { border: 1px solid var(--divider-color); border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+          summary { cursor: pointer; font-weight: 600; }
+          p { color: var(--secondary-text-color); margin: 8px 0; }
+          ol { list-style: none; margin: 0; padding: 0; }
+          li { display: flex; align-items: center; gap: 8px; min-height: 40px; border-bottom: 1px solid var(--divider-color); }
+          li.drop-before { box-shadow: inset 0 2px var(--primary-color); }
+          li.drop-after { box-shadow: inset 0 -2px var(--primary-color); }
+          .grip { cursor: grab; padding: 8px; touch-action: none; }
+          .name { flex: 1; }
+          button { background: transparent; color: var(--primary-text-color); border: 1px solid var(--divider-color); border-radius: 6px; min-width: 32px; min-height: 32px; cursor: pointer; }
+          button:disabled { opacity: .35; cursor: default; }
+          #reset { margin-top: 12px; padding: 4px 8px; }
+          #status { position: absolute; clip-path: inset(50%); }
+        </style>
+        <details open>
+          <summary>Section order</summary>
+          <p>Drag the handles or use the arrow buttons to move a section.</p>
+          <ol aria-label="Section order"></ol>
+          <button id="reset" type="button">Reset to default order</button>
+          <span id="status" role="status"></span>
+        </details>
+        <ha-form></ha-form>`;
+      this.form = root.querySelector("ha-form");
+      this.form.schema = form;
+      this.form.computeLabel = (item) => item.label;
+      this.form.computeHelper = (item) => item.helper;
+      this.form.addEventListener("value-changed", (event) =>
+        this.change(event.detail.value),
+      );
+
+      this.list = root.querySelector("ol");
+      this.reset = root.getElementById("reset");
+      this.reset.addEventListener("click", () => {
+        const config = { ...this.config };
+        delete config.section_order;
+        this.change(config);
+      });
+      this.list.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-step]");
+        if (!button) return;
+        const id = button.closest("li").dataset.section;
+        const index = this.order.indexOf(id);
+        this.move(id, index + Number(button.dataset.step), button.dataset.step);
+      });
+      this.list.addEventListener("dragstart", (event) => {
+        const grip = event.target.closest(".grip");
+        if (!grip) return;
+        this.dragged = grip.closest("li").dataset.section;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", this.dragged);
+      });
+      this.list.addEventListener("dragover", (event) => {
+        const row = event.target.closest("li");
+        if (!this.dragged || !row) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        this.clearDrop();
+        row.classList.add(
+          this.dropAfter(event, row) ? "drop-after" : "drop-before",
+        );
+      });
+      this.list.addEventListener("drop", (event) => {
+        const row = event.target.closest("li");
+        if (!this.dragged || !row) return;
+        event.preventDefault();
+        const from = this.order.indexOf(this.dragged);
+        const target = this.order.indexOf(row.dataset.section);
+        if (from === target) {
+          this.finishDrag();
+          return;
+        }
+        const index =
+          target + Number(this.dropAfter(event, row)) - Number(from < target);
+        this.move(this.dragged, index);
+        this.finishDrag();
+      });
+      this.list.addEventListener("dragend", () => this.finishDrag());
+    }
+
+    set hass(hass) {
+      this.form.hass = hass;
+    }
+
+    setConfig(config) {
+      this.config = config;
+      this.form.data = config;
+      const order = normalizeOrder(config.section_order);
+      this.reset.disabled = !config.section_order;
+      if (this.order?.every((id, index) => id === order[index])) return;
+      this.order = order;
+      this.list.innerHTML = order
+        .map((id, index) => {
+          const label = esc(sections[id].label);
+          return `<li data-section="${id}">
+          <span class="grip" draggable="true" aria-hidden="true">⠿</span>
+          <span class="name">${label}</span>
+          <button type="button" data-step="-1" aria-label="Move ${label} up" ${index === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" data-step="1" aria-label="Move ${label} down" ${index === order.length - 1 ? "disabled" : ""}>↓</button>
+        </li>`;
+        })
+        .join("");
+    }
+
+    dropAfter(event, row) {
+      const rect = row.getBoundingClientRect();
+      return event.clientY > rect.top + rect.height / 2;
+    }
+
+    clearDrop() {
+      this.list
+        .querySelector(".drop-before, .drop-after")
+        ?.classList.remove("drop-before", "drop-after");
+    }
+
+    finishDrag() {
+      this.dragged = null;
+      this.clearDrop();
+    }
+
+    move(id, index, step) {
+      const from = this.order.indexOf(id);
+      if (index < 0 || index >= this.order.length || index === from) return;
+      const order = [...this.order];
+      order.splice(from, 1);
+      order.splice(index, 0, id);
+      this.change({ ...this.config, section_order: order });
+      const row = this.list.children[index];
+      const next =
+        row.querySelector(`button[data-step="${step}"]:enabled`) ||
+        row.querySelector("button:enabled");
+      if (step) next?.focus();
+      this.shadowRoot.getElementById("status").textContent =
+        `${sections[id].label} moved to position ${index + 1} of ${order.length}.`;
+    }
+
+    change(config) {
+      this.setConfig(config);
+      this.dispatchEvent(
+        new CustomEvent("config-changed", {
+          detail: { config },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
+  }
   class NetworkConsole extends HTMLElement {
     constructor() {
       super();
@@ -234,12 +402,18 @@
         }
       }
     }
-    static getConfigForm() {
-      return {
-        schema: form,
-        computeLabel: (field) => field.label,
-        computeHelper: (field) => field.helper,
-      };
+    static async getConfigElement() {
+      if (!customElements.get("ha-form")) {
+        // The built-in Markdown editor loads Home Assistant's native form controls.
+        const helpers = await window.loadCardHelpers();
+        const card = helpers.createCardElement({
+          type: "markdown",
+          content: "",
+        });
+        await customElements.whenDefined(card.localName);
+        await card.constructor.getConfigElement();
+      }
+      return document.createElement("yanke-network-control-editor");
     }
     static getStubConfig() {
       return { latency_max_ms: 500 };
@@ -384,7 +558,51 @@
       if (!hidden) this.rows(target, hasContent ? rows : []);
       return hidden;
     }
+    applyOrder() {
+      const order = this.config.section_order
+        ? normalizeOrder(this.config.section_order)
+        : null;
+      const key = JSON.stringify(order);
+      if (key === this.orderKey) return;
+      this.orderKey = key;
+      if (!this.orderGrid && !order) return;
+      if (!this.orderGrid) {
+        this.orderGrid = document.createElement("div");
+        this.orderGrid.className = "ordered-grid";
+        this.root.querySelector(".grid").after(this.orderGrid);
+        this.orderedSections = Object.fromEntries(
+          defaultOrder.map((id) => {
+            const { panels, wide } = sections[id];
+            const wrapper = document.createElement("div");
+            wrapper.className = wide
+              ? "ordered-section wide-section"
+              : "ordered-section";
+            wrapper.dataset.section = id;
+            const entries = panels.map((panel) => {
+              const node = this.root.getElementById(panel);
+              const anchor = document.createComment(panel);
+              node.before(anchor);
+              return { node, anchor };
+            });
+            return [id, { wrapper, entries }];
+          }),
+        );
+      }
+      this.root.querySelector(".grid").hidden = Boolean(order);
+      this.orderGrid.hidden = !order;
+      if (!order) {
+        for (const { entries } of Object.values(this.orderedSections))
+          for (const { node, anchor } of entries) anchor.after(node);
+        return;
+      }
+      for (const id of order) {
+        const { wrapper, entries } = this.orderedSections[id];
+        for (const { node } of entries) wrapper.append(node);
+        this.orderGrid.append(wrapper);
+      }
+    }
     update() {
+      this.applyOrder();
       const config = this.config;
       const hide = (id, hidden) => {
         this.root.getElementById(id).hidden = Boolean(hidden);
@@ -1176,6 +1394,7 @@
     }
   }
   if (!customElements.get("yanke-network-control")) {
+    customElements.define("yanke-network-control-editor", NetworkControlEditor);
     customElements.define("yanke-network-control", NetworkConsole);
     window.customCards ??= [];
     window.customCards.push({
