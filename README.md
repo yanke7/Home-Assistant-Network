@@ -40,6 +40,10 @@ latency_max_ms: 500
 
 For manual installation, copy `custom_components/network_control` to the same path under your Home Assistant configuration directory, then follow steps 2–3.
 
+## Schedule speed tests
+
+The built-in speed test runs every 60 minutes by default. To change it, open **Settings → Devices & services → Network Control → Configure** and enter an interval in minutes. Enter **0** to disable automatic tests. Saving starts a new interval. **Run speed test** remains available for on-demand measurements.
+
 ## Optional integrations and controls
 
 Everything below is optional. A section appears automatically when Home Assistant has at least one matching entity, tracker or control. A temporary sensor outage leaves that section visible. Choose **Always show** to display sections you’re still setting up.

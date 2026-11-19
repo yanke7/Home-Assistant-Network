@@ -6,11 +6,13 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import Platform
 from homeassistant.helpers import config_validation as cv
 
+from .const import DEFAULT_SPEED_TEST_INTERVAL, SPEED_TEST_INTERVAL
+
 DOMAIN = "network_control"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 PLATFORMS = [Platform.SENSOR, Platform.BUTTON]
 CARD_PATH = "/network_control/network-control.js"
-CARD_URL = f"{CARD_PATH}?v=1.12.1"
+CARD_URL = f"{CARD_PATH}?v=1.13.0"
 
 
 async def async_setup(hass, config):
@@ -30,8 +32,18 @@ async def async_setup_entry(hass, entry):
 
     entry.runtime_data = SpeedTest(hass)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await _update_schedule(hass, entry)
+    entry.async_on_unload(entry.runtime_data.cancel_schedule)
+    entry.async_on_unload(entry.add_update_listener(_update_schedule))
     frontend.add_extra_js_url(hass, CARD_URL)
     return True
+
+
+async def _update_schedule(_hass, entry):
+    """Apply the configured interval without restarting the integration."""
+    entry.runtime_data.schedule(
+        entry.options.get(SPEED_TEST_INTERVAL, DEFAULT_SPEED_TEST_INTERVAL)
+    )
 
 
 async def async_unload_entry(hass, entry):

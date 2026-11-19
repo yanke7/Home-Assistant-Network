@@ -9,5 +9,19 @@
     "abort": {
       "single_instance_allowed": "Network Control is already set up."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Speed test schedule",
+        "description": "Network Control runs speed tests from your Home Assistant host.",
+        "data": {
+          "speed_test_interval": "Automatic speed test interval (minutes)"
+        },
+        "data_description": {
+          "speed_test_interval": "Defaults to 60 minutes. Enter 0 to turn off automatic tests."
+        }
+      }
+    }
   }
 }
