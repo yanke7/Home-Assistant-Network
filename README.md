@@ -30,7 +30,9 @@ latency_max_ms: 500
 # ssl_entity: sensor.certificate_expiry
 ```
 
-![Network Control showing synthetic speed, DNS and network device data](docs/dashboard.png)
+![Network Control dashboard with demo data](docs/themes/network.webp)
+
+[Browse screenshots of all nine themes](docs/theme-gallery.md)
 
 ## Install
 
@@ -91,6 +93,6 @@ The card ships with its own stylesheet and standalone defaults. To use the palet
 
 ## Preview and feedback
 
-The screenshot comes from [a synthetic demo](docs/demo.html). Serve this repository with `python3 -m http.server` and open `/docs/demo.html` to try the card without Home Assistant. Add `?empty` to test missing entities.
+The [theme gallery](docs/theme-gallery.md) uses [a synthetic demo](docs/demo.html). Serve this repository with `python3 -m http.server` and open `/docs/demo.html` to try the card without Home Assistant. Add `?empty` to test missing entities.
 
 Report issues with your Home Assistant version and the optional integrations you use. Replace IPs, MAC addresses, location data, and personal device names before attaching screenshots or logs.

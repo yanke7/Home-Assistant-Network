@@ -25,7 +25,7 @@ entity('sensor.demo_phone_battery', 82, 'Phone battery', '%');
 entity('sensor.demo_printer_black_toner_remaining', 64, 'Black toner', '%');
 entity('sensor.demo_cpu', 14, 'CPU', '%');
 entity('sensor.demo_ram', 38, 'RAM', '%');
-entity('sensor.demo_disk', 115, 'Free disk', 'GiB');
+entity('sensor.demo_disk', 115, 'Free disk', 'GiB', {free_percent: 62});
 entity('sensor.demo_temp', 41, 'CPU temperature', '°C');
 entity('sensor.demo_boot', new Date(now - 748800000).toISOString(), 'Host boot', null, {device_class:'timestamp'});
 entity('sensor.demo_dns', 14820, 'DNS queries today');
@@ -62,11 +62,21 @@ const config = {
     const ids = new URLSearchParams(path.split('?')[1]).get('filter_entity_id').split(',');
     return ids.map((entity_id, series) => Array.from({length: 13}, (_, i) => ({
       entity_id,
-      state: String(series === 2 && i === 5 ? 1000000 : Math.max(1,
+      state: entity_id === 'sensor.demo_boot' ? states[entity_id].state : String(series === 2 && i === 5 ? 1000000 : Math.max(1,
         Number(states[entity_id].state === 'home' ? 1 : states[entity_id].state === 'not_home' ? 0 : states[entity_id].state)
         + Math.sin(i * 2.1) * [40, 11, 4][series % 3])),
       last_changed: new Date(now - (12 - i) * 7200000).toISOString(),
     })));
+  },
+};
+// Demonstrate a shared Appearance palette without requiring other dashboard resources.
+window.YankeAppearance = {
+  apply(shell) {
+    const palette = {
+      bg:'#f1eee5', surface:'#fffaf0', raised:'#e9dfcc', text:'#26291f',
+      muted:'#555b4c', line:'#9aa89d', accent:'#4d6329', success:'#246844', warning:'#875a10',
+    };
+    for (const [name, color] of Object.entries(palette)) shell.style.setProperty('--yanke-' + name, color);
   },
 };
 card.hass = location.search.includes('empty') ? {...config, states:{}, callWS: async () => []} : config;
