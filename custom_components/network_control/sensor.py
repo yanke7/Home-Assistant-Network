@@ -10,13 +10,12 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
+from .host_monitor import HostMonitor
 from .speed_test import RESULT_SIGNAL
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Expose download, upload and ping history as Home Assistant sensors."""
-    from .host_monitor import HostMonitor
-
     host = HostMonitor(hass, entry)
     await host.async_config_entry_first_refresh()
     async_add_entities([
