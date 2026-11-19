@@ -35,6 +35,22 @@
     field(name, label, { entity: { domain: domains, multiple } }, helper);
   const toggle = (name, label, helper) =>
     field(name, label, { boolean: {} }, helper);
+  const visibility = (name, label) =>
+    field(
+      "show_" + name,
+      label,
+      {
+        select: {
+          mode: "dropdown",
+          options: [
+            { value: "auto", label: "Automatic" },
+            { value: "always", label: "Always show" },
+            { value: "never", label: "Hide" },
+          ],
+        },
+      },
+      "When unset, the section uses Automatic or keeps a previous hide setting.",
+    );
   const group = (name, title, schema) => ({
     type: "expandable",
     name,
@@ -51,18 +67,14 @@
         { text: {} },
         "Leave blank for Network / control.",
       ),
-      toggle("hide_connection", "Hide connection speed and history"),
-      toggle("hide_personal", "Hide personal devices"),
-      toggle(
-        "hide_printer",
-        "Hide printer supplies",
-        "Already hidden when no ink or toner sensors are found.",
-      ),
-      toggle("hide_scanner", "Hide network scanner"),
-      toggle("hide_host", "Hide host health"),
-      toggle("hide_dns", "Hide DNS and ad blocking"),
-      toggle("hide_remote", "Hide remote access and SSL"),
-      toggle("hide_controls", "Hide network controls"),
+      visibility("connection", "Connection speed and history"),
+      visibility("personal", "Personal devices"),
+      visibility("printer", "Printer supplies"),
+      visibility("scanner", "Network scanner"),
+      visibility("host", "Host health"),
+      visibility("dns", "DNS and ad blocking"),
+      visibility("remote", "Remote access and SSL"),
+      visibility("controls", "Network controls"),
       toggle("show_wan_ip", "Show public WAN address"),
       toggle("show_mac", "Show device MAC addresses"),
     ]),
@@ -192,11 +204,11 @@
       });
     }
     setConfig(config) {
-      const scannerWasHidden = this.config?.hide_scanner;
+      const scannerWasHidden = this.mode("scanner") === "never";
       const before = JSON.stringify([
         this.speed,
         this.latencyCap,
-        this.config?.hide_connection,
+        this.mode("connection"),
       ]);
       this.config = config;
       this.speed = ["download_sensor", "upload_sensor", "latency_sensor"].map(
@@ -205,14 +217,18 @@
       const cap = Number(config.latency_max_ms ?? 500);
       this.latencyCap = Number.isFinite(cap) && cap >= 10 ? cap : 500;
       if (this.root) {
-        if (scannerWasHidden && !config.hide_scanner && !this.regOk) {
+        if (
+          scannerWasHidden &&
+          this.mode("scanner") !== "never" &&
+          !this.regOk
+        ) {
           this.loadRegistry().then(() => this.loadActivity());
         }
         this.update();
         this.renderScan(true);
         if (
           before !==
-          JSON.stringify([this.speed, this.latencyCap, config.hide_connection])
+          JSON.stringify([this.speed, this.latencyCap, this.mode("connection")])
         ) {
           this.loadHistory();
         }
@@ -235,7 +251,6 @@
       this._hass = hass;
       if (!this.root) {
         this.build();
-        this.loadHistory();
         this.loadRegistry().then(() => this.loadActivity());
       }
       this.update();
@@ -270,7 +285,7 @@
         : "—";
     }
     build() {
-      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network<span> / </span>control</h1><div class="head-right"><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner"><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
+      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network<span> / </span>control</h1><div class="head-right"><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
         ["online", "Online", "ok"],
         ["offline", "Dropped off", "warn"],
         ["unnamed", "Unnamed", ""],
@@ -352,6 +367,23 @@
       this.markup[id] = html;
       this.root.getElementById(id).innerHTML = html;
     }
+    mode(section) {
+      return (
+        this.config?.["show_" + section] ||
+        (this.config?.["hide_" + section] ? "never" : "auto")
+      );
+    }
+    sectionHidden(section, hasContent) {
+      const mode = this.mode(section);
+      return mode === "never" || (mode !== "always" && !hasContent);
+    }
+    updateSection(section, panel, target, rows) {
+      const hasContent = rows.some(([, id]) => this.state(id));
+      const hidden = this.sectionHidden(section, hasContent);
+      this.root.getElementById(panel).hidden = hidden;
+      if (!hidden) this.rows(target, hasContent ? rows : []);
+      return hidden;
+    }
     update() {
       const config = this.config;
       const hide = (id, hidden) => {
@@ -363,21 +395,18 @@
           ? esc(config.title.trim())
           : "Network<span> / </span>control",
       );
-      hide("speed-metrics", config.hide_connection);
-      hide("history", config.hide_connection);
-      hide("personal-panel", config.hide_personal);
-      hide("scanner", config.hide_scanner);
-      hide("host-panel", config.hide_host);
-      hide("dns-panel", config.hide_dns);
-      hide("remote-panel", config.hide_remote);
-      hide("actions-panel", config.hide_controls);
-      hide(
-        "support",
-        config.hide_host &&
-          config.hide_dns &&
-          config.hide_remote &&
-          config.hide_controls,
+      const activeSpeed = this.speed.filter((id) => this.state(id));
+      const connectionHidden = this.sectionHidden(
+        "connection",
+        activeSpeed.length > 0,
       );
+      hide("speed-metrics", connectionHidden);
+      hide("history", connectionHidden);
+      const historyKey = JSON.stringify([connectionHidden, activeSpeed]);
+      if (this.historyVisibilityKey !== historyKey) {
+        this.historyVisibilityKey = historyKey;
+        this.loadHistory();
+      }
       const ids = Object.keys(this._hass.states);
       const routerId =
         config.wan_sensor ||
@@ -420,7 +449,9 @@
             (this._hass.entities?.[id]?.platform === "mobile_app" &&
               /_(battery_level|storage)$/.test(id)),
         );
-      this.rows(
+      const personalHidden = this.updateSection(
+        "personal",
+        "personal-panel",
         "personal",
         personal.map((id) => [null, id]),
       );
@@ -429,24 +460,20 @@
         ids.filter((id) =>
           /^sensor\..*_(ink|toner)(?:_(remaining|level))?$/.test(id),
         );
-      const printerHidden =
-        config.hide_printer || !supplies.some((id) => this.state(id));
-      const sideHidden = config.hide_personal && printerHidden;
-      hide("printers", printerHidden);
-      hide("side", sideHidden);
-      hide("main", config.hide_connection && sideHidden);
-      this.root
-        .getElementById("main")
-        .classList.toggle(
-          "single-column",
-          Boolean(sideHidden || config.hide_connection),
-        );
-      this.rows(
+      const printerHidden = this.updateSection(
+        "printer",
+        "printers",
         "supplies",
         supplies.map((id) => [null, id]),
       );
+      const sideHidden = personalHidden && printerHidden;
+      hide("side", sideHidden);
+      hide("main", connectionHidden && sideHidden);
+      this.root
+        .getElementById("main")
+        .classList.toggle("single-column", sideHidden || connectionHidden);
 
-      this.rows("host", [
+      const hostHidden = this.updateSection("host", "host-panel", "host", [
         [
           "CPU usage",
           config.cpu_sensor ||
@@ -476,7 +503,7 @@
       const dnsPlatform = ["adguard", "pi_hole"].find((platform) =>
         this.discovered(platform, /_(dns_)?queries(?:_today)?$/),
       );
-      this.rows("dns", [
+      const dnsHidden = this.updateSection("dns", "dns-panel", "dns", [
         [
           dnsPlatform === "adguard"
             ? "DNS queries (statistics window)"
@@ -496,14 +523,28 @@
             ),
         ],
       ]);
-      this.rows("remote", [
-        ["Remote access", config.remote_access_entity],
+      const remoteHidden = this.updateSection(
+        "remote",
+        "remote-panel",
+        "remote",
         [
-          "SSL certificate",
-          config.ssl_entity || this.discovered("cert_expiry", /^sensor\./),
+          ["Remote access", config.remote_access_entity],
+          [
+            "SSL certificate",
+            config.ssl_entity || this.discovered("cert_expiry", /^sensor\./),
+          ],
         ],
-      ]);
+      );
       this.renderActions();
+      const controlsHidden = this.sectionHidden(
+        "controls",
+        this.availableActions.length > 0,
+      );
+      hide("actions-panel", controlsHidden);
+      hide(
+        "support",
+        hostHidden && dnsHidden && remoteHidden && controlsHidden,
+      );
     }
     actions() {
       const config = this.config;
@@ -610,16 +651,16 @@
       }
     }
     async loadHistory() {
-      if (this.config.hide_connection) {
+      if (this.root.getElementById("history").hidden) {
         this.historyRequest = null;
         return;
       }
-      const key = JSON.stringify([this.speed, this.latencyCap]);
+      const active = this.speed.filter((id) => this.state(id));
+      const key = JSON.stringify([this.speed, this.latencyCap, active]);
       if (this.historyRequest?.key === key) return;
       this.historyRequest = null;
       const note = this.root.getElementById("chartnote");
       const axis = [0, 1, 2, 3].map((i) => this.root.getElementById("yl" + i));
-      const active = this.speed.filter((id) => this.state(id));
       if (!active.length) {
         this.root.getElementById("plot").innerHTML =
           '<div class="empty">Entity not configured</div>';
@@ -710,7 +751,7 @@
     }
     /* ---------- Network scanner (Nmap Tracker entities) ---------- */
     async loadRegistry() {
-      if (this.config.hide_scanner) return;
+      if (this.mode("scanner") === "never") return;
       try {
         const all = await this._hass.callWS({
           type: "config/entity_registry/list",
@@ -842,12 +883,19 @@
       );
     }
     renderScan(force) {
-      if (!this.root || !this._hass || this.config.hide_scanner) return;
+      if (!this.root || !this._hass) return;
+      const panel = this.root.getElementById("scanner");
+      if (this.mode("scanner") === "never") {
+        panel.hidden = true;
+        return;
+      }
       const list = this.root.getElementById("scanlist");
       if (!list) return;
       if (this.scan.editing && !force) return;
-      const model = this.scanModel(),
-        minute = Math.floor(Date.now() / 60000);
+      const model = this.scanModel();
+      panel.hidden = this.sectionHidden("scanner", model.length > 0);
+      if (panel.hidden) return;
+      const minute = Math.floor(Date.now() / 60000);
       const sig = JSON.stringify([
         model.map((d) => [d.id, d.status, d.ip, d.name, d.changed]),
         this.scan.tab,
@@ -1068,7 +1116,7 @@
       );
     }
     async loadActivity() {
-      if (this.config.hide_scanner) return;
+      if (this.mode("scanner") === "never") return;
       if (!this._hass || !this.regOk) return;
       const ids = Object.keys(this.reg).filter(
         (id) => !this.reg[id].disabled_by,

@@ -6,9 +6,9 @@ A responsive Home Assistant network dashboard for internet speed, Wi-Fi device p
 
 ## Customize in Home Assistant
 
-Open the dashboard, choose **Edit dashboard**, then edit the **Network Control** card. Use the visual editor to choose entities from your Home Assistant instance, change the heading, and turn sections on or off. Save the dashboard when you’re done.
+Open the dashboard, choose **Edit dashboard**, then edit the **Network Control** card. Use the visual editor to choose entities from your Home Assistant instance, change the heading, and choose when each optional section appears. Save the dashboard when you’re done.
 
-- **No printer?** The printer section hides automatically when it has no ink or toner sensors. To hide it even when sensors exist, open **Layout and privacy** and enable **Hide printer supplies**.
+- **Layout and privacy** gives each optional section three choices. **Automatic** hides sections with no matching entities or controls. **Always show** displays the section and its empty state. **Hide** keeps it off the dashboard. Existing hide settings carry forward until you choose a new mode.
 - **Missing a sensor or control?** Choose an existing entity under the matching section. You can leave optional fields empty and hide sections you don’t use.
 - **Want an exact mapping?** The card also accepts the YAML below for imports and advanced setups. The visual editor uses the same settings.
 
@@ -39,7 +39,7 @@ For manual installation, copy `custom_components/network_control` to the same pa
 
 ## Optional integrations and controls
 
-Everything below is optional. Missing entities show “Entity not configured.” The printer panel hides when no supplies are found.
+Everything below is optional. A section appears automatically when Home Assistant has at least one matching entity, tracker or control. A temporary sensor outage leaves that section visible. Choose **Always show** to display sections you’re still setting up.
 
 | Feature | Provider and configuration |
 | --- | --- |
