@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Network Control demo</title>
 <style>html,body{margin:0;background:#101722}</style>
-<yanke-network-control></yanke-network-control>
+<hui-panel-view><yanke-network-control></yanke-network-control></hui-panel-view>
 <script type="module">
 import '../custom_components/network_control/www/network-control.js';
 
@@ -16,9 +16,10 @@ function entity(id, state, friendly_name, unit, attributes = {}) {
     attributes: {friendly_name, unit_of_measurement: unit, ...attributes},
   };
 }
-entity('sensor.speedtest_download', 581.4, 'Download', 'Mbps');
-entity('sensor.speedtest_upload', 92.6, 'Upload', 'Mbps');
-entity('sensor.speedtest_ping', 18, 'Latency', 'ms');
+entity('sensor.network_control_download', 581.4, 'Download', 'Mbps');
+entity('sensor.network_control_upload', 92.6, 'Upload', 'Mbps');
+entity('sensor.network_control_ping', 18, 'Latency', 'ms');
+entity('button.network_control_run_speed_test', 'unknown', 'Run speed test');
 entity('sensor.demo_wan_ip', '203.0.113.24', 'WAN address');
 entity('person.resident', 'home', 'Demo resident');
 entity('binary_sensor.demo_bridge', 'on', 'Home bridge');
@@ -38,19 +39,30 @@ const trackers = ['Router', 'Workstation', 'Media server', 'Access point', 'Prin
   return {entity_id, platform:'nmap_tracker', name, disabled_by:pending ? 'integration' : null};
 });
 const card = document.querySelector('yanke-network-control');
-card.setConfig({
+const cardConfig = {
+  type: "custom:yanke-network-control",
   router_name:'Example gateway', wan_sensor:'sensor.demo_wan_ip', show_wan_ip:true,
   show_printer:'never',
   personal_entities:['person.resident','binary_sensor.demo_bridge','sensor.demo_phone_battery','sensor.demo_phone_storage','sensor.demo_laptop_battery'],
   enable_restart:true,
   cpu_sensor:'sensor.demo_cpu', memory_sensor:'sensor.demo_ram', disk_sensor:'sensor.demo_disk',
   temperature_sensor:'sensor.demo_temp', uptime_sensor:'sensor.demo_boot',
-});
+};
+const panel = card.parentElement;
+panel.path = ['views', 0];
+panel.lovelace = {
+  mode: 'storage', urlPath: 'demo', rawConfig: {views: [{cards: [cardConfig]}]},
+  async saveConfig(dashboard) {
+    this.rawConfig = dashboard;
+    card.setConfig(dashboard.views[0].cards[0]);
+  },
+};
+card.setConfig(cardConfig);
 const config = {
   states, devices:{}, entities:{}, user:{is_admin:true},
-  services:{homeassistant:{update_entity:{},restart:{}}},
+  services:{homeassistant:{restart:{}},button:{press:{}}},
   callService: async () => {},
-  callWS: async () => trackers,
+  callWS: async ({type}) => type === "lovelace/config" ? structuredClone(panel.lovelace.rawConfig) : trackers,
   callApi: async (_, path) => {
     const ids = new URLSearchParams(path.split('?')[1]).get('filter_entity_id').split(',');
     return ids.map((entity_id, series) => Array.from({length: 13}, (_, i) => ({

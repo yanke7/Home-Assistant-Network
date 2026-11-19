@@ -6,6 +6,28 @@ Network Control is a Home Assistant network monitoring dashboard for checking in
 
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
 
+## Dashboard screenshots
+
+All screenshots use fictional devices and sample readings.
+
+### Desktop
+
+![Network Control desktop dashboard with live-style scanner, host gauges and controls](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network.webp)
+
+### Mobile
+
+![Network Control on a phone with the Settings and Manage buttons visible](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network-mobile.webp)
+
+![Star Trek theme on a phone](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek-mobile.webp)
+
+### More desktop themes
+
+![Star Trek theme on desktop](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek.webp)
+
+![Mac Control theme on desktop](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac.webp)
+
+[View all nine desktop and mobile themes](https://github.com/yanke7/Home-Assistant-Network/blob/main/docs/theme-gallery.md)
+
 ## Why use Network Control?
 
 - **Find out what slowed down.** Compare built-in Speedtest results and ping history with the host’s CPU, memory, disk space, temperature, and uptime. Install Network Control to start collecting speed and host readings.
@@ -22,32 +44,6 @@ Network Control is a Home Assistant network monitoring dashboard for checking in
 | Catch sustained load on my Home Assistant host | Alert when the built-in CPU sensor stays above your threshold for several minutes. |
 
 The guide has ready-to-copy YAML for all four examples. You can also open it from **Settings → Automation examples** in the dashboard. [View automation examples](docs/automations.md)
-
-## Dashboard screenshots
-
-![Network Control dashboard with demo data](docs/themes/network.webp)
-
-### More themes on desktop
-
-<table>
-<tr><th>Star Trek</th><th>Mac Control</th></tr>
-<tr><td><a href="docs/themes/trek.webp"><img src="docs/themes/trek.webp" alt="Star Trek dashboard on desktop" width="480"></a></td><td><a href="docs/themes/mac.webp"><img src="docs/themes/mac.webp" alt="Mac Control dashboard on desktop" width="480"></a></td></tr>
-<tr><th>Neon Grid</th><th>Aqua Current</th></tr>
-<tr><td><a href="docs/themes/neon.webp"><img src="docs/themes/neon.webp" alt="Neon Grid dashboard on desktop" width="480"></a></td><td><a href="docs/themes/tide.webp"><img src="docs/themes/tide.webp" alt="Aqua Current dashboard on desktop" width="480"></a></td></tr>
-</table>
-
-### On a phone
-
-<table>
-<tr><th>Network Control</th><th>Star Trek</th><th>Mac Control</th></tr>
-<tr>
-<td><a href="docs/themes/network-mobile.webp"><img src="docs/themes/network-mobile.webp" alt="Network Control dashboard on a phone" width="180"></a></td>
-<td><a href="docs/themes/trek-mobile.webp"><img src="docs/themes/trek-mobile.webp" alt="Star Trek dashboard on a phone" width="180"></a></td>
-<td><a href="docs/themes/mac-mobile.webp"><img src="docs/themes/mac-mobile.webp" alt="Mac Control dashboard on a phone" width="180"></a></td>
-</tr>
-</table>
-
-[Browse screenshots of all nine themes](docs/theme-gallery.md)
 
 ## Install
 
