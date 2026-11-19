@@ -29,6 +29,8 @@
     "sensor.speedtest_upload",
     "sensor.speedtest_ping",
   ];
+  const builtInSpeed = ["download", "upload", "ping"].map((key) => "sensor.network_control_" + key);
+  const speedKeys = ["download_sensor", "upload_sensor", "latency_sensor"];
   const missing = "Entity not configured";
   const available = (state) =>
     state && !["unknown", "unavailable", ""].includes(state.state);
@@ -111,7 +113,7 @@
         "Download speed sensor",
         "sensor",
         false,
-        "Leave blank to use the default Speedtest.net download sensor.",
+        "Leave blank to use Network Control’s built-in speed test sensor.",
       ),
       entity("upload_sensor", "Upload speed sensor", "sensor"),
       entity("latency_sensor", "Latency sensor", "sensor"),
@@ -246,9 +248,7 @@
         this.mode("connection"),
       ]);
       this.config = config;
-      this.speed = ["download_sensor", "upload_sensor", "latency_sensor"].map(
-        (key, index) => config[key] || speedDefaults[index],
-      );
+      this.selectSpeedSensors();
       const cap = Number(config.latency_max_ms ?? 500);
       this.latencyCap = Number.isFinite(cap) && cap >= 10 ? cap : 500;
       if (this.root) {
@@ -282,8 +282,13 @@
     getCardSize() {
       return 12;
     }
+    selectSpeedSensors() {
+      this.speed = speedKeys.map((key, index) => this.config[key] ||
+        (this._hass?.states[builtInSpeed[index]] ? builtInSpeed[index] : speedDefaults[index]));
+    }
     set hass(hass) {
       this._hass = hass;
+      this.selectSpeedSensors();
       if (!this.root) {
         this.build();
         this.loadRegistry().then(() => this.loadActivity());
@@ -756,6 +761,8 @@
       };
       if (config.speedtest_action_entity)
         entityAction("Run speed test", config.speedtest_action_entity);
+      else if (this.speed.every((id, index) => id === builtInSpeed[index]))
+        entityAction("Run speed test", "button.network_control_run_speed_test");
       else if (
         this._hass.entities?.[this.speed[0]]?.platform === "speedtestdotnet" ||
         this.speed[0] === speedDefaults[0]

@@ -16,9 +16,10 @@ Open the dashboard, choose **Edit dashboard**, then edit the **Network Control**
 
 ```yaml
 type: custom:yanke-network-control
-download_sensor: sensor.speedtest_download
-upload_sensor: sensor.speedtest_upload
-latency_sensor: sensor.speedtest_ping
+# Optional overrides for another speed-test provider
+# download_sensor: sensor.speedtest_download
+# upload_sensor: sensor.speedtest_upload
+# latency_sensor: sensor.speedtest_ping
 latency_max_ms: 500
 # wan_sensor: sensor.router_external_ip
 # router_entity: sensor.router_external_ip
@@ -45,7 +46,7 @@ Everything below is optional. A section appears automatically when Home Assistan
 
 | Feature | Provider and configuration |
 | --- | --- |
-| Speed and history | [Speedtest.net](https://www.home-assistant.io/integrations/speedtestdotnet/) and [Recorder](https://www.home-assistant.io/integrations/recorder/). Run a test through the native update action or set `speedtest_action_entity` to a button or script. The spinner stays visible until Home Assistant responds. Latency above the configured cap is omitted from the chart. |
+| Speed and history | **Run speed test** uses Network Control’s built-in tester from the Home Assistant host. It contacts Speedtest.net on demand and records download, upload and ping in [Recorder](https://www.home-assistant.io/integrations/recorder/). The separate Speedtest.net integration is optional for existing setups. Configure all three sensors and a button or script if you use another provider. |
 | Device presence | [Nmap Tracker](https://www.home-assistant.io/integrations/nmap_tracker/) for your own LAN. Admin users can enable newly discovered trackers and rename devices. [Person](https://www.home-assistant.io/integrations/person/) and Companion App battery/storage sensors populate Personal devices. |
 | WAN and printer | A router external IP sensor and [IPP](https://www.home-assistant.io/integrations/ipp/) or equivalent supply sensors. Use the config keys above when entity names differ. WAN IP and MAC display are opt-in. Set `show_mac: true` to display scanner MAC addresses. |
 | Host health | [System Monitor](https://www.home-assistant.io/integrations/systemmonitor/) with processor use, memory usage, disk free, processor temperature and uptime sensors enabled. Override discovery with `cpu_sensor`, `memory_sensor`, `disk_sensor`, `temperature_sensor` and `uptime_sensor`. |
