@@ -355,7 +355,7 @@
         )
         .join(
           "",
-        )}</div><div class="scanbar"><div class="tabs"><button data-tab="devices" class="on">Devices</button><button data-tab="activity">Activity</button></div><input class="search" id="scansearch" type="search" placeholder="Filter devices" aria-label="Filter devices"></div><div id="pending"></div><div class="scanlist" id="scanlist"><div class="none">Loading devices…</div></div><div class="scanfoot"><span id="scanfoot"></span><span id="scanerr"></span></div></section><div class="support" id="support">
+        )}</div><div class="scanbar"><div class="tabs"><button data-tab="devices" class="on">Devices</button><button data-tab="activity">Activity</button><button data-tab="new">New devices</button></div><input class="search" id="scansearch" type="search" placeholder="Filter devices" aria-label="Filter devices"></div><div id="pending"></div><div class="scanlist" id="scanlist"><div class="none">Loading devices…</div></div><div class="scanfoot"><span id="scanfoot"></span><span id="scanerr"></span></div></section><div class="support" id="support">
  <section class="panel" id="host-panel"><div class="heading"><h2>Host health</h2><span class="tag">24-hour history</span></div><div id="host" class="readings"></div><svg class="trek-ship" viewBox="0 0 430 80" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"><path d="M8 44 Q96 37 182 43 L199 49 L186 57 L28 56Z M23 48H184 M37 53H176 M183 52 L235 60 L270 43 M176 57 L219 69 L265 66 L299 40 M217 68 L215 75 H264 L278 64 M230 71H266 M246 58 L277 32 Q311 13 355 11 Q398 12 425 33 L413 41 L315 46 L270 40Z M273 32 Q349 24 425 33 M283 37 Q354 41 413 37 M308 24 Q356 17 396 25 M334 16 L331 42 M365 14 L372 43 M289 30 L282 40 M252 58 L281 47 M266 62 L288 49"/><path opacity=".42" d="M48 46V55 M69 45V55 M95 45V55 M121 44V55 M147 45V55 M172 45V55 M240 65V74 M251 65V74 M264 61V70 M305 28V43 M317 23V44 M349 14V44 M382 17V43 M399 23V42 M278 35H420 M296 27H401"/></g></svg></section>
  <section class="panel" id="dns-panel"><div class="heading"><h2>DNS &amp; ad blocking</h2></div><div id="dns" class="readings"></div></section>
  <section class="panel" id="remote-panel"><div class="heading"><h2>Remote access &amp; SSL</h2></div><div id="remote" class="readings"></div></section>
@@ -1388,7 +1388,7 @@
         return;
       }
       const q = this.scan.q,
-        f = this.scan.filter;
+        f = this.scan.tab === "new" ? "pending" : this.scan.filter;
       const rows = model.filter(
         (d) =>
           (f === "all" || (f === "unnamed" ? !d.custom : d.status === f)) &&
@@ -1403,6 +1403,10 @@
           (a.status !== "online") - (b.status !== "online") ||
           0,
       );
+      if (this.scan.tab === "new" && !pend.length && this.regOk !== false) {
+        list.innerHTML = '<div class="none">No new devices awaiting tracking.</div>';
+        return;
+      }
       if (!model.length) {
         list.innerHTML = `<div class="none">${this.regOk === false ? "Device list could not be read." : "No Nmap Tracker devices yet. Add Nmap Tracker to populate this panel."}</div>`;
         return;

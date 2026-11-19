@@ -44,6 +44,28 @@ For manual installation, copy `custom_components/network_control` to the same pa
 
 The built-in speed test runs every 60 minutes by default. To change it, open **Settings → Devices & services → Network Control → Configure** and enter an interval in minutes. Enter **0** to disable automatic tests. Saving starts a new interval. **Run speed test** remains available for on-demand measurements.
 
+## Get alerts for new network devices
+
+The scanner’s **New devices** tab lists Nmap Tracker discoveries awaiting tracking. **Track** moves them into the tracked list.
+
+To get an alert, create an automation with a **State** trigger for `event.network_control_new_device`. Use the YAML below to include the first discovery and ignore restoration of older events.
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: event.network_control_new_device
+    not_to:
+      - unknown
+      - unavailable
+conditions:
+  - condition: template
+    value_template: >
+      {{ trigger.to_state.attributes.event_type == 'device_discovered'
+         and (now() - as_datetime(trigger.to_state.state)).total_seconds() < 30 }}
+```
+
+Add your preferred notification action. Use `{{ trigger.to_state.attributes.device_name }}` for the name and `{{ trigger.to_state.attributes.discovered_entity_id }}` for the tracker entity ID. Alerts fire on first registration by Nmap Tracker. A device reconnecting or being renamed won’t trigger an alert.
+
 ## Optional integrations and controls
 
 Everything below is optional. A section appears automatically when Home Assistant has at least one matching entity, tracker or control. A temporary sensor outage leaves that section visible. Choose **Always show** to display sections you’re still setting up.

@@ -10,9 +10,9 @@ from .const import DEFAULT_SPEED_TEST_INTERVAL, SPEED_TEST_INTERVAL
 
 DOMAIN = "network_control"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-PLATFORMS = [Platform.SENSOR, Platform.BUTTON]
+PLATFORMS = [Platform.SENSOR, Platform.BUTTON, Platform.EVENT]
 CARD_PATH = "/network_control/network-control.js"
-CARD_URL = f"{CARD_PATH}?v=1.15.0"
+CARD_URL = f"{CARD_PATH}?v=1.16.0"
 
 
 async def async_setup(hass, config):

@@ -1616,3 +1616,9 @@ summary {
 .manage-choices label {display:flex;align-items:center;gap:8px;padding:5px 0}
 .manage-choices small {display:block;color:var(--yanke-muted);overflow-wrap:anywhere}
 .manage-footer {display:flex;justify-content:flex-end;gap:7px;margin-top:10px;flex-wrap:wrap}
+
+@media (max-width:650px) {
+  .scanbar {flex-wrap:wrap}
+  .scanbar .tabs {max-width:100%}
+  .scanbar .search {flex:1 1 130px;min-width:0}
+}
