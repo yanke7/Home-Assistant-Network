@@ -2,9 +2,26 @@
 
 <img src="docs/networkcontrol.webp" alt="Network Control logo" width="160" height="160">
 
-A responsive Home Assistant network dashboard for internet speed, Wi-Fi device presence, host health, DNS blocking, VPN and certificate status. Includes a live Nmap Tracker device list, 24-hour history, and optional network controls.
+Network Control is a Home Assistant network monitoring dashboard for checking internet speed, finding devices on your LAN, and keeping an eye on your Home Assistant host. It puts download, upload, ping, device activity, and host health history on one screen.
 
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
+
+## Why use Network Control?
+
+- **Find out what slowed down.** Compare built-in Speedtest results and ping history with the host’s CPU, memory, disk space, temperature, and uptime. Install Network Control to start collecting speed and host readings.
+- **See what’s on your network.** Pair it with Nmap Tracker to see which devices are online, review recent activity, and spot newly discovered devices waiting to be tracked.
+- **Keep useful controls close by.** Run a speed test, find a device, or open a connection snapshot from the dashboard. You can also add Home Assistant buttons, scripts, and switches for controls your other integrations expose.
+
+## What can you automate?
+
+| I want to… | How it works |
+| --- | --- |
+| Get a phone alert when a new device joins my network | Trigger a notification when Network Control reports a first-time Nmap Tracker discovery. The alert can include the device name and tracker ID. |
+| Know when my internet slows down | Send an alert when the built-in download sensor falls below a threshold you choose. |
+| Compare speeds at a consistent time | Press the built-in speed-test button from a time-based automation. The dashboard also supports an adjustable automatic test interval. |
+| Catch sustained load on my Home Assistant host | Alert when the built-in CPU sensor stays above your threshold for several minutes. |
+
+The guide has ready-to-copy YAML for all four examples. You can also open it from **Settings → Automation examples** in the dashboard. [View automation examples](docs/automations.md)
 
 ## Dashboard screenshots
 
@@ -66,7 +83,7 @@ latency_max_ms: 500
 
 ## Schedule speed tests
 
-The built-in speed test runs every 60 minutes by default. To change it, open **Settings → Devices & services → Network Control → Configure** and enter an interval in minutes. Enter **0** to disable automatic tests. Saving starts a new interval. **Run speed test** remains available for on-demand measurements.
+The built-in speed test runs every 60 minutes by default. To change it, open **Settings** on the dashboard, enter an interval under **Automatic speed tests**, and select **Save interval**. You can also change it in **Settings → Devices & services → Network Control → Configure**. Enter **0** to disable automatic tests. Saving starts a new interval. **Run speed test** remains available for on-demand measurements.
 
 ## Get alerts for new network devices
 

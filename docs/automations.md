@@ -64,3 +64,23 @@ actions:
       entity_id: button.network_control_run_speed_test
 mode: single
 ```
+
+## Alert when host CPU stays high
+
+The built-in CPU sensor reports an average over each minute. This example sends a notification after CPU usage stays above 80% for five minutes. Adjust the threshold and duration for your host.
+
+```yaml
+alias: Alert on sustained Home Assistant CPU usage
+triggers:
+  - trigger: numeric_state
+    entity_id: sensor.network_control_host_cpu
+    above: 80
+    for:
+      minutes: 5
+actions:
+  - action: notify.mobile_app_your_phone
+    data:
+      title: High Home Assistant CPU usage
+      message: "CPU usage is {{ trigger.to_state.state }}% after five minutes above 80%."
+mode: single
+```
