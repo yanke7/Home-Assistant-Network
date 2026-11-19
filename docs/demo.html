@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Network Control demo</title>
+<style>html,body{margin:0;background:#101722}</style>
+<yanke-network-control></yanke-network-control>
+<script type="module">
+import '../custom_components/network_control/www/network-control.js';
+
+const now = Date.now();
+const states = {};
+function entity(id, state, friendly_name, unit, attributes = {}) {
+  states[id] = {
+    entity_id: id, state: String(state), last_changed: new Date(now - 3600000).toISOString(),
+    attributes: {friendly_name, unit_of_measurement: unit, ...attributes},
+  };
+}
+entity('sensor.speedtest_download', 581.4, 'Download', 'Mbps');
+entity('sensor.speedtest_upload', 92.6, 'Upload', 'Mbps');
+entity('sensor.speedtest_ping', 18, 'Latency', 'ms');
+entity('sensor.demo_wan_ip', '203.0.113.24', 'WAN address');
+entity('person.resident', 'home', 'Demo resident');
+entity('sensor.demo_phone_battery', 82, 'Phone battery', '%');
+entity('sensor.demo_printer_black_toner_remaining', 64, 'Black toner', '%');
+entity('sensor.demo_cpu', 14, 'CPU', '%');
+entity('sensor.demo_ram', 38, 'RAM', '%');
+entity('sensor.demo_disk', 115, 'Free disk', 'GiB');
+entity('sensor.demo_temp', 41, 'CPU temperature', '°C');
+entity('sensor.demo_boot', new Date(now - 748800000).toISOString(), 'Host boot', null, {device_class:'timestamp'});
+entity('sensor.demo_dns', 14820, 'DNS queries today');
+entity('sensor.demo_blocked', 22.7, 'Ads blocked', '%');
+entity('binary_sensor.demo_vpn', 'on', 'VPN');
+entity('sensor.demo_certificate', new Date(now + 2678400000).toISOString(), 'Certificate expiry', null, {device_class:'timestamp'});
+entity('switch.demo_pihole', 'on', 'Pi-hole');
+entity('switch.demo_guest', 'off', 'Guest Wi-Fi');
+entity('button.demo_router', 'unknown', 'Router reboot');
+entity('button.demo_wake', 'unknown', 'Wake workstation');
+
+const trackers = ['Router', 'Workstation', 'Media server', 'Access point', 'Printer'].map((name, i) => {
+  const entity_id = 'device_tracker.demo_' + i;
+  entity(entity_id, i === 4 ? 'not_home' : 'home', name, null, {ip:'192.0.2.' + (10 + i)});
+  return {entity_id, platform:'nmap_tracker', name, disabled_by:null};
+});
+const card = document.querySelector('yanke-network-control');
+card.setConfig({
+  router_name:'Example gateway', wan_sensor:'sensor.demo_wan_ip', show_wan_ip:true,
+  personal_entities:['person.resident','sensor.demo_phone_battery'],
+  cpu_sensor:'sensor.demo_cpu', memory_sensor:'sensor.demo_ram', disk_sensor:'sensor.demo_disk',
+  temperature_sensor:'sensor.demo_temp', uptime_sensor:'sensor.demo_boot',
+  dns_queries_sensor:'sensor.demo_dns', dns_blocked_sensor:'sensor.demo_blocked',
+  remote_access_entity:'binary_sensor.demo_vpn', ssl_entity:'sensor.demo_certificate',
+  pihole_switch:'switch.demo_pihole', guest_wifi_entity:'switch.demo_guest',
+  router_reboot_entity:'button.demo_router', wake_entities:['button.demo_wake'],
+});
+const config = {
+  states, devices:{}, entities:{}, user:{is_admin:true},
+  services:{homeassistant:{update_entity:{}},pi_hole:{disable:{}},switch:{toggle:{}},button:{press:{}}},
+  callService: async () => {},
+  callWS: async () => trackers,
+  callApi: async (_, path) => {
+    const ids = new URLSearchParams(path.split('?')[1]).get('filter_entity_id').split(',');
+    return ids.map((entity_id, series) => Array.from({length: 13}, (_, i) => ({
+      entity_id,
+      state: String(series === 2 && i === 5 ? 1000000 : Math.max(1,
+        Number(states[entity_id].state === 'home' ? 1 : states[entity_id].state === 'not_home' ? 0 : states[entity_id].state)
+        + Math.sin(i * 2.1) * [40, 11, 4][series % 3])),
+      last_changed: new Date(now - (12 - i) * 7200000).toISOString(),
+    })));
+  },
+};
+card.hass = location.search.includes('empty') ? {...config, states:{}, callWS: async () => []} : config;
+</script>
+</html>

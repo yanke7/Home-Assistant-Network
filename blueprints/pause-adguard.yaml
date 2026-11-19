@@ -1,0 +1,25 @@
+blueprint:
+  name: Pause AdGuard filtering for five minutes
+  description: Pause an enabled AdGuard Home filtering switch for five minutes. Restarting Home Assistant interrupts the script.
+  domain: script
+  source_url: https://github.com/yanke7/Home-Assistant-Network/blob/main/blueprints/pause-adguard.yaml
+  input:
+    filtering_switch:
+      name: AdGuard Home filtering switch
+      selector:
+        entity:
+          filter:
+            - integration: adguard
+              domain: switch
+mode: single
+sequence:
+  - condition: state
+    entity_id: !input filtering_switch
+    state: "on"
+  - action: switch.turn_off
+    target:
+      entity_id: !input filtering_switch
+  - delay: "00:05:00"
+  - action: switch.turn_on
+    target:
+      entity_id: !input filtering_switch

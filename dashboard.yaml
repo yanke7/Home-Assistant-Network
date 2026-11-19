@@ -1,0 +1,7 @@
+title: Network Control
+views:
+  - title: Network
+    path: overview
+    type: panel
+    cards:
+      - type: custom:yanke-network-control

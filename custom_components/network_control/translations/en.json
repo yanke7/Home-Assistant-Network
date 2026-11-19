@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Network Control",
+        "description": "Load the Network Control dashboard card."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Network Control is already set up."
+    }
+  }
+}
