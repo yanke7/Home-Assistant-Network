@@ -1,6 +1,6 @@
 # Network Control theme gallery
 
-Desktop and mobile screenshots use the same fictional devices and sample readings. The mobile screenshots are 390 pixels wide and show the full scrollable dashboard. Select an image to open it at full size. **Follow Appearance** shows an example shared palette.
+Desktop and mobile screenshots show the same layout with fictional devices and sample readings. The gallery shows speed readings, connection history, the network scanner, host health, personal devices, and network controls. The mobile screenshots are 390 pixels wide and show the full scrollable dashboard. Select an image to open it at full size. **Follow Appearance** shows an example shared palette.
 
 [Return to setup instructions](../README.md)
 

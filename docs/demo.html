@@ -21,41 +21,34 @@ entity('sensor.speedtest_upload', 92.6, 'Upload', 'Mbps');
 entity('sensor.speedtest_ping', 18, 'Latency', 'ms');
 entity('sensor.demo_wan_ip', '203.0.113.24', 'WAN address');
 entity('person.resident', 'home', 'Demo resident');
+entity('binary_sensor.demo_bridge', 'on', 'Home bridge');
 entity('sensor.demo_phone_battery', 82, 'Phone battery', '%');
-entity('sensor.demo_printer_black_toner_remaining', 64, 'Black toner', '%');
+entity('sensor.demo_phone_storage', 28.4, 'Phone storage free', '%');
+entity('sensor.demo_laptop_battery', 63, 'Laptop battery', '%');
 entity('sensor.demo_cpu', 14, 'CPU', '%');
 entity('sensor.demo_ram', 38, 'RAM', '%');
 entity('sensor.demo_disk', 115, 'Free disk', 'GiB', {free_percent: 62});
 entity('sensor.demo_temp', 41, 'CPU temperature', '°C');
 entity('sensor.demo_boot', new Date(now - 748800000).toISOString(), 'Host boot', null, {device_class:'timestamp'});
-entity('sensor.demo_dns', 14820, 'DNS queries today');
-entity('sensor.demo_blocked', 22.7, 'Ads blocked', '%');
-entity('binary_sensor.demo_vpn', 'on', 'VPN');
-entity('sensor.demo_certificate', new Date(now + 2678400000).toISOString(), 'Certificate expiry', null, {device_class:'timestamp'});
-entity('switch.demo_pihole', 'on', 'Pi-hole');
-entity('switch.demo_guest', 'off', 'Guest Wi-Fi');
-entity('button.demo_router', 'unknown', 'Router reboot');
-entity('button.demo_wake', 'unknown', 'Wake workstation');
 
-const trackers = ['Router', 'Workstation', 'Media server', 'Access point', 'Printer'].map((name, i) => {
+const trackers = ['Router', 'Workstation', 'Media server', 'Access point', 'Printer', 'Kitchen display', 'Office speaker', 'Living room TV', 'Tablet', 'Desk lamp', 'Studio speaker', 'Guest phone'].map((name, i) => {
   const entity_id = 'device_tracker.demo_' + i;
-  entity(entity_id, i === 4 ? 'not_home' : 'home', name, null, {ip:'192.0.2.' + (10 + i)});
-  return {entity_id, platform:'nmap_tracker', name, disabled_by:null};
+  const pending = i >= 10;
+  if (!pending) entity(entity_id, i === 4 ? 'not_home' : 'home', name, null, {ip:'192.0.2.' + (10 + i)});
+  return {entity_id, platform:'nmap_tracker', name, disabled_by:pending ? 'integration' : null};
 });
 const card = document.querySelector('yanke-network-control');
 card.setConfig({
   router_name:'Example gateway', wan_sensor:'sensor.demo_wan_ip', show_wan_ip:true,
-  personal_entities:['person.resident','sensor.demo_phone_battery'],
+  show_printer:'never',
+  personal_entities:['person.resident','binary_sensor.demo_bridge','sensor.demo_phone_battery','sensor.demo_phone_storage','sensor.demo_laptop_battery'],
+  enable_restart:true,
   cpu_sensor:'sensor.demo_cpu', memory_sensor:'sensor.demo_ram', disk_sensor:'sensor.demo_disk',
   temperature_sensor:'sensor.demo_temp', uptime_sensor:'sensor.demo_boot',
-  dns_queries_sensor:'sensor.demo_dns', dns_blocked_sensor:'sensor.demo_blocked',
-  remote_access_entity:'binary_sensor.demo_vpn', ssl_entity:'sensor.demo_certificate',
-  pihole_switch:'switch.demo_pihole', guest_wifi_entity:'switch.demo_guest',
-  router_reboot_entity:'button.demo_router', wake_entities:['button.demo_wake'],
 });
 const config = {
   states, devices:{}, entities:{}, user:{is_admin:true},
-  services:{homeassistant:{update_entity:{}},pi_hole:{disable:{}},switch:{toggle:{}},button:{press:{}}},
+  services:{homeassistant:{update_entity:{},restart:{}}},
   callService: async () => {},
   callWS: async () => trackers,
   callApi: async (_, path) => {
