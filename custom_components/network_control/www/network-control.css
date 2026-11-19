@@ -1527,3 +1527,37 @@ summary {
   .shell[data-theme="trek"] header {flex-wrap:wrap;gap:5px}
   .shell[data-theme="trek"] .head-right {flex-wrap:wrap;justify-content:flex-start}
 }
+
+.shell[data-theme="trek"] .metrics {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+}
+.shell[data-theme="trek"] .metric {
+  display:grid;
+  grid-template-rows:1.85em minmax(0,1fr) auto;
+  padding:0 0 5px;
+  overflow:hidden;
+  border:0;
+  background:linear-gradient(to right,var(--tile) 7px,#090807 7px);
+}
+.shell[data-theme="trek"] .metric .label {
+  align-items:center;
+  margin:0;
+  padding:0 10px;
+  border-radius:0 999px 999px 0;
+  line-height:1;
+  white-space:nowrap;
+}
+.shell[data-theme="trek"] .metric .value {
+  align-self:center;
+  margin:0;
+  padding-inline:12px 6px;
+  line-height:1;
+  white-space:nowrap;
+}
+.shell[data-theme="trek"] .metric .sub {
+  padding-inline:12px 6px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
