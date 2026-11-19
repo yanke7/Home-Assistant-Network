@@ -19,6 +19,7 @@
     neon: ["Neon Grid", "#070d20", "#fd86e6"],
     abyss: ["Midnight Drift", "#0b1022", "#77f1ff"],
     tide: ["Aqua Current", "#0b384b", "#7dffde"],
+    mac: ["Mac Control", "#a7a89e", "#b9ff70"],
     appearance: ["Follow Appearance", "#26382d", "#a6c48a"],
   };
   const themeKey = "network-control.theme";

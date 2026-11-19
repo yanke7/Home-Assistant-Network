@@ -1308,3 +1308,70 @@ summary {
     width:min(54%,74cqh);
   }
 }
+
+/* Mac Control's brushed-metal faceplate and inset instruments. */
+.shell[data-theme="mac"] {
+  --yanke-bg:#181a17;
+  --yanke-surface:#252823;
+  --yanke-raised:#353930;
+  --yanke-text:#f5f6ed;
+  --yanke-muted:#c5c8b8;
+  --yanke-line:#9a9d8d;
+  --yanke-accent:#b9ff70;
+  --faceplate:repeating-linear-gradient(0deg,#ffffff0b 0 1px,#0000000a 1px 2px),linear-gradient(115deg,#8b8e83,#deded3 48%,#9d9f94);
+  color:var(--yanke-text);
+}
+.shell[data-theme="mac"] header {
+  padding-inline:6px;
+  border:1px solid #e5e5d9;
+  border-radius:7px;
+  background:var(--faceplate);
+  color:#171a14;
+  box-shadow:inset 0 0 0 2px #74796d;
+}
+.shell[data-theme="mac"] header :is(.topline,.ip) {color:#171a14}
+.shell[data-theme="mac"] :is(.panel,.metric) {
+  border:2px solid #b8bbac;
+  border-radius:9px;
+  box-shadow:inset 0 0 0 1px #080b06,inset 0 0 0 3px #64695b;
+  background:linear-gradient(145deg,#30342d,#20231e);
+}
+.shell[data-theme="mac"] :is(.actions button,.theme-button,.tabs button,.theme-dialog button) {
+  color:#f7f8ee;
+  border:1px solid #9b9f90;
+  border-radius:6px;
+  background:linear-gradient(#51554b,#282b24 56%,#1a1d17);
+  box-shadow:inset 0 1px 2px #ffffff54,0 1px 2px #090a08;
+}
+.shell[data-theme="mac"] :is(.actions button,.theme-button,.tabs button,.theme-dialog button):active,
+.shell[data-theme="mac"] .tabs button.on {
+  background:linear-gradient(#0a0d07,#282e21);
+  box-shadow:inset 0 2px 4px #000a;
+  color:var(--yanke-accent);
+}
+.shell[data-theme="mac"] :is(.actions button,.theme-button,.tabs button):focus-visible {
+  outline:2px solid var(--yanke-accent);
+  outline-offset:-2px;
+}
+.shell[data-theme="mac"] .host-instrument:not(.instrument-4) {
+  --dial:#b9ff70;
+  --start:222deg;
+  --sweep:276deg;
+}
+.shell[data-theme="mac"] .host-instrument:not(.instrument-4) .instrument-display strong {
+  align-self:center;
+  font-size:clamp(11px,min(11cqw,20cqh),21px);
+}
+.shell[data-theme="mac"] .host-instrument:not(.instrument-4) .instrument-arc {
+  top:50%;
+  inset-inline:auto;
+  height:calc(100% - 2px);
+  width:min(100%, max(74px, 26cqw));
+  aspect-ratio:auto;
+  transform:translateY(-50%);
+  border:3px solid #d8dacb;
+  box-shadow:inset 0 0 0 2px #6c7460,0 1px 3px #000;
+  background:radial-gradient(ellipse,#090e05 60%,transparent 62%),conic-gradient(from var(--start),var(--dial) calc(var(--level) * var(--sweep)),#30382b 0 var(--sweep),#0d110a 0);
+  mask:none;
+  filter:none;
+}
