@@ -1516,7 +1516,7 @@ summary {
   flex:none;align-self:center;margin:0 8px 4px;
 }
 @media (min-width:1000px) and (min-height:680px) {
-  .shell[data-theme="trek"] .grid {height:calc(100dvh - 156px)}
+  .shell[data-theme="trek"] .grid {height:calc(100dvh - 169px)}
 }
 @media (min-width:1000px) and (max-height:790px) {
   .shell[data-theme="trek"] #host {grid-template-rows:minmax(0,1fr) auto}
