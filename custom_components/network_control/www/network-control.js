@@ -649,7 +649,7 @@
         return `<button type="button" class="host-instrument instrument-${index}" ${state ? `data-entity="${esc(id)}"` : "disabled"}>
           <span class="instrument-label">${esc(label)}</span>
           <span class="instrument-display"><i class="instrument-arc" aria-hidden="true" style="--level:${fill}"></i><strong>${esc(value)}</strong></span>
-          ${graph || `<span class="instrument-empty">${state ? "No history yet" : "Entity not configured"}</span>`}
+          <span class="instrument-plot">${graph || `<span class="instrument-empty">${state ? "No history yet" : "Entity not configured"}</span>`}</span>
         </button>`;
       }).join("");
       this.renderMarkup("host", markup);
