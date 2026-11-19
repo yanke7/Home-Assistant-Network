@@ -1181,3 +1181,23 @@ summary {
   .grid:has(#dns-panel[hidden]):has(#remote-panel[hidden]) #actions-panel {grid-column:3;grid-row:4}
   .grid:has(#dns-panel[hidden]):has(#remote-panel[hidden]):has(#host-panel:not([hidden])) {grid-template-rows:clamp(72px,10vh,94px) max-content minmax(0,1fr) minmax(0,1.35fr)}
 }
+
+@media (min-width:1000px) and (min-height:680px) {
+  .grid:has(#printers[hidden]):has(#dns-panel[hidden]):has(#remote-panel[hidden]):has(#host-panel:not([hidden])) {
+    grid-template-rows:clamp(72px,10vh,94px) max-content minmax(180px,1.45fr) minmax(0,1fr);
+  }
+  .grid:has(#printers[hidden]):has(#dns-panel[hidden]):has(#remote-panel[hidden]) #host-panel {
+    grid-row:3;
+  }
+  .grid:has(#printers[hidden]):has(#dns-panel[hidden]):has(#remote-panel[hidden]) #personal-panel {
+    grid-column:1;
+    grid-row:4;
+  }
+  .grid:has(#printers[hidden]):has(#dns-panel[hidden]):has(#remote-panel[hidden]) #actions-panel {
+    grid-column:2;
+    grid-row:4;
+  }
+  .grid:has(#printers[hidden]):has(#dns-panel[hidden]):has(#remote-panel[hidden]) > .scan {
+    grid-row:1 / span 4;
+  }
+}
