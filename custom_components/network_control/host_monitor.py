@@ -36,11 +36,31 @@ def _read(label, read):
         return None
 
 
-def sample_host(config_dir):
+def cpu_average(previous, current):
+    """Calculate busy time as a percentage of the interval between readings."""
+    if previous is None or current is None:
+        return None
+    deltas = {
+        field: value - getattr(previous, field)
+        for field, value in current._asdict().items()
+        if field not in ("guest", "guest_nice")
+    }
+    if any(delta < 0 for delta in deltas.values()):
+        return None
+    total = sum(deltas.values())
+    if not total:
+        return None
+    idle = deltas["idle"] + deltas.get("iowait", 0)
+    return round(100 * (total - idle) / total, 1)
+
+
+def sample_host(config_dir, previous_cpu=None):
     """Read host metrics off Home Assistant's event loop."""
     disk = _read("disk space", lambda: psutil.disk_usage(config_dir))
+    current_cpu = _read("CPU times", psutil.cpu_times)
     return {
-        "host_cpu": _read("CPU use", lambda: psutil.cpu_percent(interval=0.25)),
+        "host_cpu": cpu_average(previous_cpu, current_cpu),
+        "cpu_times": current_cpu,
         "host_ram": _read("memory use", lambda: psutil.virtual_memory().percent),
         "host_disk_free": round(disk.free / 1024**3, 2) if disk else None,
         "disk_free_percent": round(100 * disk.free / disk.total, 1) if disk and disk.total else None,
@@ -62,4 +82,7 @@ class HostMonitor(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self):
-        return await self.hass.async_add_executor_job(sample_host, self.hass.config.config_dir)
+        previous_cpu = self.data.get("cpu_times") if self.data else None
+        return await self.hass.async_add_executor_job(
+            sample_host, self.hass.config.config_dir, previous_cpu
+        )
