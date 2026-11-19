@@ -638,26 +638,26 @@
       const hostRows = [
         [
           "CPU usage",
-          config.cpu_sensor ||
+          config.cpu_sensor || this.hostSensor("host_cpu") ||
             this.discovered("systemmonitor", /_processor_use$/),
         ],
         [
           "RAM usage",
-          config.memory_sensor ||
+          config.memory_sensor || this.hostSensor("host_ram") ||
             this.discovered("systemmonitor", /_memory_usage$/),
         ],
         [
           "Disk free",
-          config.disk_sensor || this.discovered("systemmonitor", /_disk_free/),
+          config.disk_sensor || this.hostSensor("host_disk_free") || this.discovered("systemmonitor", /_disk_free/),
         ],
         [
           "CPU temperature",
-          config.temperature_sensor ||
+          config.temperature_sensor || this.hostSensor("host_temperature") ||
             this.discovered("systemmonitor", /_processor_temperature$/),
         ],
         [
           "System uptime",
-          config.uptime_sensor ||
+          config.uptime_sensor || this.hostSensor("host_boot") ||
             this.discovered("systemmonitor", /_last_boot$/) ||
             this.discovered("uptime", /^sensor\./),
         ],
@@ -711,6 +711,11 @@
         hostHidden && dnsHidden && remoteHidden && controlsHidden,
       );
     }
+    hostSensor(key) {
+      const id = "sensor.network_control_" + key;
+      return this.state(id)?.entity_id ? id : undefined;
+    }
+
     setupHostTooltip() {
       const host = this.root.getElementById("host");
       const tooltip = document.createElement("div");
@@ -766,7 +771,9 @@
           ? `${Math.floor(minutes / 1440)}d ${Math.floor(minutes / 60) % 24}h ${minutes % 60}m`
           : available(state) ? `${state.state}${unit === "%" ? "%" : unit ? " " + unit : ""}` : "—";
         let fraction = numeric && unit === "%" ? number / 100 : null;
-        if (index === 2 && numeric && available(diskUse) && diskUse.attributes.unit_of_measurement === "%")
+        if (index === 2 && numeric && Number.isFinite(state.attributes.free_percent))
+          fraction = state.attributes.free_percent / 100;
+        else if (index === 2 && numeric && available(diskUse) && diskUse.attributes.unit_of_measurement === "%")
           fraction = 1 - Number(diskUse.state) / 100;
         if (index === 3 && numeric && ["°C", "°F"].includes(unit))
           fraction = (unit === "°F" ? (number - 32) * 5 / 9 : number) / 100;
