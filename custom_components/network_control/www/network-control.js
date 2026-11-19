@@ -205,6 +205,15 @@
         if (this.theme === "appearance" && this._hass)
           window.YankeAppearance?.apply(this.root?.querySelector(".shell"), this._hass);
       };
+      this.panelPreferencesKey = "network-control.panels:" + location.pathname;
+      this.panelPreferences = {};
+      try {
+        const saved = JSON.parse(localStorage.getItem(this.panelPreferencesKey));
+        for (const panel of ["personal", "controls"]) {
+          if (Array.isArray(saved?.[panel]))
+            this.panelPreferences[panel] = saved[panel].filter((id) => typeof id === "string");
+        }
+      } catch { /* Default to discovery when saved preferences are unavailable. */ }
       this.reg = {};
       this.scan = {
         tab: "devices",
@@ -216,6 +225,11 @@
         sig: "",
       };
       this.shadowRoot.addEventListener("click", (e) => {
+        const manage = e.target.closest("[data-manage-panel]");
+        if (manage) {
+          if (!this.preview) this.managePanel(manage);
+          return;
+        }
         const shortcut = e.target.closest("[data-network-shortcut]");
         if (shortcut) {
           if (!this.preview)
@@ -328,7 +342,7 @@
         : "—";
     }
     build() {
-      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><span class="trek-ops">Primary Ops</span><button type="button" class="theme-button">Settings</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
+      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><span class="trek-ops">Primary Ops</span><button type="button" class="theme-button">Settings</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2><button type="button" class="manage-panel" data-manage-panel="personal" aria-label="Manage personal devices">Manage</button></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
         ["online", "Online", "ok"],
         ["offline", "Dropped off", "warn"],
         ["unnamed", "Unnamed", ""],
@@ -343,7 +357,7 @@
  <section class="panel" id="host-panel"><div class="heading"><h2>Host health</h2><span class="tag">24-hour history</span></div><div id="host" class="readings"></div><svg class="trek-ship" viewBox="0 0 430 80" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"><path d="M8 44 Q96 37 182 43 L199 49 L186 57 L28 56Z M23 48H184 M37 53H176 M183 52 L235 60 L270 43 M176 57 L219 69 L265 66 L299 40 M217 68 L215 75 H264 L278 64 M230 71H266 M246 58 L277 32 Q311 13 355 11 Q398 12 425 33 L413 41 L315 46 L270 40Z M273 32 Q349 24 425 33 M283 37 Q354 41 413 37 M308 24 Q356 17 396 25 M334 16 L331 42 M365 14 L372 43 M289 30 L282 40 M252 58 L281 47 M266 62 L288 49"/><path opacity=".42" d="M48 46V55 M69 45V55 M95 45V55 M121 44V55 M147 45V55 M172 45V55 M240 65V74 M251 65V74 M264 61V70 M305 28V43 M317 23V44 M349 14V44 M382 17V43 M399 23V42 M278 35H420 M296 27H401"/></g></svg></section>
  <section class="panel" id="dns-panel"><div class="heading"><h2>DNS &amp; ad blocking</h2></div><div id="dns" class="readings"></div></section>
  <section class="panel" id="remote-panel"><div class="heading"><h2>Remote access &amp; SSL</h2></div><div id="remote" class="readings"></div></section>
- <section class="panel" id="actions-panel"><div class="heading"><h2>Network controls</h2></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
+ <section class="panel" id="actions-panel"><div class="heading"><h2>Network controls</h2><button type="button" class="manage-panel" data-manage-panel="controls" aria-label="Manage network controls">Manage</button></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
  </div></div></div></div>`;
       this.root = this.shadowRoot;
       this.setupSettings();
@@ -578,7 +592,7 @@
             : "Last speed test";
       });
 
-      const personal =
+      this.defaultPersonal =
         config.personal_entities ??
         ids.filter(
           (id) =>
@@ -586,12 +600,18 @@
             (this._hass.entities?.[id]?.platform === "mobile_app" &&
               /_(battery_level|storage)$/.test(id)),
         );
-      const personalHidden = this.updateSection(
+      const personal = this.panelPreferences.personal ?? this.defaultPersonal;
+      let personalHidden = this.updateSection(
         "personal",
         "personal-panel",
         "personal",
         personal.map((id) => [null, id]),
       );
+      if (this.panelPreferences.personal && this.mode("personal") !== "never") {
+        personalHidden = false;
+        hide("personal-panel", false);
+        this.rows("personal", personal.map((id) => [null, id]));
+      }
       const supplies =
         config.printer_entities ??
         ids.filter((id) =>
@@ -678,7 +698,7 @@
       this.renderActions();
       const controlsHidden = this.sectionHidden(
         "controls",
-        this.availableActions.length > 0 || this.shortcuts().length > 0,
+        this.availableActions.length > 0 || this.visibleShortcuts.length > 0 || Boolean(this.panelPreferences.controls),
       );
       hide("actions-panel", controlsHidden);
       hide(
@@ -912,9 +932,87 @@
       (tab === "devices" ? this.root.getElementById("scansearch") : scanner.querySelector('[data-tab="activity"]')).focus();
     }
 
+    controlKey(action) {
+      return `service:${action.domain}.${action.service}:${action.target || ""}:${action.label}`;
+    }
+
+    managePanel(trigger) {
+      const panel = trigger.dataset.managePanel;
+      const personal = panel === "personal";
+      const shortcuts = this.shortcuts();
+      const actions = this.actions();
+      const defaultSelection = personal ? this.defaultPersonal : [
+        ...shortcuts.map(([id]) => "shortcut:" + id),
+        ...actions.map((action) => this.controlKey(action)),
+      ];
+      const selected = new Set(this.panelPreferences[panel] ?? defaultSelection);
+      const choices = new Map();
+      if (!personal) {
+        for (const [id, label] of shortcuts) choices.set("shortcut:" + id, label);
+        for (const action of actions) choices.set(this.controlKey(action), action.label);
+      }
+      const domains = personal ? /^(person|device_tracker|sensor|binary_sensor|switch|light|input_boolean|input_number|input_select|input_text|weather|media_player)\./ : /^(button|script|switch)\./;
+      for (const [id, state] of Object.entries(this._hass.states)) {
+        if (domains.test(id)) choices.set(id, state.attributes.friendly_name || id);
+      }
+      for (const id of selected) {
+        if (!choices.has(id)) choices.set(id, id.replace(/^.*:/, ""));
+      }
+      const dialog = document.createElement("dialog");
+      dialog.className = "theme-dialog panel-manager";
+      const title = personal ? "Manage personal devices" : "Manage network controls";
+      dialog.setAttribute("aria-label", title);
+      dialog.innerHTML = `<div class="theme-heading"><strong>${title}</strong></div>
+        <input type="search" autofocus aria-label="Find an entity or control" placeholder="Search names or entity IDs">
+        <div class="manage-choices"></div>
+        <div class="manage-footer"><button type="button" data-reset>Restore defaults</button><button type="button" data-cancel>Cancel</button><button type="button" data-save>Save</button></div>`;
+      const search = dialog.querySelector("input");
+      const list = dialog.querySelector(".manage-choices");
+      const sorted = [...choices].sort(([a, aLabel], [b, bLabel]) =>
+        Number(selected.has(b)) - Number(selected.has(a)) || aLabel.localeCompare(bLabel));
+      const render = () => {
+        const query = search.value.trim().toLowerCase();
+        list.innerHTML = sorted.filter(([id, label]) => `${label} ${id}`.toLowerCase().includes(query))
+          .map(([id, label]) => `<label><input type="checkbox" value="${esc(id)}" ${selected.has(id) ? "checked" : ""}><span>${esc(label)}${id.includes(":") ? "" : `<small>${esc(id)}</small>`}</span></label>`)
+          .join("") || "<p>No matches</p>";
+      };
+      list.addEventListener("change", (event) => {
+        const { checked, value } = event.target;
+        if (checked) selected.add(value);
+        else selected.delete(value);
+      });
+      const save = (reset) => {
+        if (reset) delete this.panelPreferences[panel];
+        else this.panelPreferences[panel] = [...selected];
+        try { localStorage.setItem(this.panelPreferencesKey, JSON.stringify(this.panelPreferences)); }
+        catch { /* Keep the preferences for this page. */ }
+        this.update();
+        dialog.close();
+      };
+      search.addEventListener("input", render);
+      dialog.querySelector("[data-reset]").onclick = () => save(true);
+      dialog.querySelector("[data-cancel]").onclick = () => dialog.close();
+      dialog.querySelector("[data-save]").onclick = () => save(false);
+      dialog.addEventListener("close", () => { dialog.remove(); trigger.focus(); }, { once: true });
+      this.root.querySelector(".shell").append(dialog);
+      render();
+      dialog.showModal();
+    }
+
     renderActions() {
-      this.availableActions = this.actions();
-      const shortcuts = this.shortcuts().map(([id, label, icon]) =>
+      const selected = this.panelPreferences.controls;
+      this.availableActions = this.actions().filter((action) => !selected || selected.includes(this.controlKey(action)));
+      for (const id of selected || []) {
+        const state = this.state(id);
+        const domain = id.split(".")[0];
+        const service = { button: "press", script: "turn_on", switch: "toggle" }[domain];
+        if (available(state) && service && this._hass.services?.[domain]?.[service])
+          this.availableActions.push({ label: state.attributes.friendly_name || id, domain, service, target: id, confirm: true });
+        else if (state?.state === "unknown" && domain === "button" && this._hass.services?.button?.press)
+          this.availableActions.push({ label: state.attributes.friendly_name || id, domain, service, target: id, confirm: true });
+      }
+      this.visibleShortcuts = this.shortcuts().filter(([id]) => !selected || selected.includes("shortcut:" + id));
+      const shortcuts = this.visibleShortcuts.map(([id, label, icon]) =>
         `<button type="button" data-network-shortcut="${id}"><ha-icon icon="${icon}" aria-hidden="true"></ha-icon>${label}</button>`).join("");
       const serviceButtons =
         this.availableActions
