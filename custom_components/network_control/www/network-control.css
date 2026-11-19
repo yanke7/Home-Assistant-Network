@@ -1375,3 +1375,104 @@ summary {
   mask:none;
   filter:none;
 }
+
+.shell[data-theme="trek"] {
+  --yanke-bg:#080706;
+  --yanke-surface:#080706;
+  --yanke-raised:#231a12;
+  --yanke-line:#604625;
+  --yanke-accent:#ffcc66;
+  --yanke-success:#8cd798;
+  --yanke-warning:#ff9e59;
+  --yanke-text:#ffe3a2;
+  --yanke-muted:#d9bb84;
+  --trek-lilac:#b3a4ed;
+  --trek-blue:#99b5ff;
+  color:var(--yanke-text);
+  font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  background:#080706;
+}
+.shell[data-theme="trek"] header {
+  padding:0 8px 0 14px;
+  border-inline-start:12px solid var(--yanke-accent);
+  border-radius:24px 3px 3px 0;
+}
+.shell[data-theme="trek"] #dashboard-title {
+  margin-inline-start:0;
+  color:var(--yanke-accent);
+  text-transform:uppercase;
+  font-weight:900;
+  letter-spacing:.045em;
+}
+.shell[data-theme="trek"] #dashboard-title::before {display:none}
+.shell[data-theme="trek"] .grid>.metrics {margin-inline-start:0}
+.shell[data-theme="trek"] .panel {
+  border:0;
+  border-inline-start:9px solid var(--trek-lilac);
+  border-block-end:3px solid var(--yanke-warning);
+  border-radius:23px 8px 10px 15px;
+  box-shadow:none;
+}
+.shell[data-theme="trek"] .scan {
+  border-inline-end:8px solid var(--trek-blue);
+  border-block-start:4px solid var(--yanke-accent);
+  border-radius:26px 26px 18px 18px;
+}
+.shell[data-theme="trek"] .hist {border-inline-start-color:var(--yanke-warning)}
+.shell[data-theme="trek"] #host-panel {border-inline-start-color:var(--yanke-accent)}
+.shell[data-theme="trek"] .heading h2 {
+  text-transform:uppercase;
+  color:var(--yanke-accent);
+  font-weight:850;
+  letter-spacing:.06em;
+}
+.shell[data-theme="trek"] .metric {
+  --tile:var(--yanke-accent);
+  padding:0 8px 4px;
+  border:0;
+  border-inline-start:8px solid var(--tile);
+  border-radius:20px 20px 6px 13px;
+  background:#090807;
+}
+.shell[data-theme="trek"] .metric:nth-child(2) {--tile:var(--yanke-warning)}
+.shell[data-theme="trek"] .metric:nth-child(3) {--tile:var(--trek-blue)}
+.shell[data-theme="trek"] .metric .label {
+  background:var(--tile);
+  border-radius:0 12px 12px 0;
+  margin:0 -8px 0 -8px;
+  padding:2px 8px;
+  color:#151009;
+  font-weight:850;
+  text-transform:uppercase;
+}
+.shell[data-theme="trek"] .metric :is(.label span,.value) {color:var(--tile)!important}
+.shell[data-theme="trek"] .metric .label span {color:#151009!important}
+.shell[data-theme="trek"] :is(.actions button,.theme-button,.tabs button,.rowbtn) {
+  color:#130e09;
+  background:var(--trek-lilac);
+  border:0;
+  border-radius:999px;
+  font-weight:750;
+}
+.shell[data-theme="trek"] :is(.theme-button,.actions button:nth-child(2n),.tabs button.on) {background:var(--yanke-accent)}
+.shell[data-theme="trek"] :is(.actions button,.tabs button,.theme-button):active {filter:brightness(.8)}
+.shell[data-theme="trek"] .actions ha-icon {color:inherit}
+.shell[data-theme="trek"] .row:not(:has(.rename)) {
+  margin-block:3px;
+  padding-inline:7px;
+  border:0;
+  border-radius:999px;
+  border-inline:5px solid #e2b259;
+  background:#392b14;
+}
+.shell[data-theme="trek"] .row.online:not(:has(.rename)) {
+  border-inline-color:#78c487;
+  background:#1f3926;
+}
+.shell[data-theme="trek"] .stat {
+  border-radius:999px;
+  background:#1e1610;
+}
+.shell[data-theme="trek"] .instrument-display strong {color:var(--dial)}
+.shell[data-theme="trek"] .instrument-2 {--dial:var(--trek-lilac)}
+.shell[data-theme="trek"] .instrument-3 {--dial:var(--yanke-warning)}
