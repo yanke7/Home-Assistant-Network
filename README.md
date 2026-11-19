@@ -1,5 +1,7 @@
 # Network Control for Home Assistant
 
+<img src="docs/networkcontrol.webp" alt="Network Control logo" width="160" height="160">
+
 A responsive Home Assistant network dashboard for internet speed, Wi-Fi device presence, host health, DNS blocking, VPN and certificate status. Includes a live Nmap Tracker device list, 24-hour history, and optional network controls.
 
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
