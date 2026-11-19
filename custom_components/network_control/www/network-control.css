@@ -1561,3 +1561,16 @@ summary {
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+
+@media (max-width:650px) {
+  .shell header {display:grid;gap:6px}
+  .shell .head-right {justify-content:flex-start;flex-wrap:wrap;min-width:0}
+  .shell .head-right .topline {
+    display:flex;
+    flex-wrap:wrap;
+    min-width:0;
+    gap:4px 8px;
+  }
+  .shell .head-right .ip {font-size:11px;overflow-wrap:anywhere}
+  .shell .head-right :is(#router,.ip):empty {display:none}
+}
