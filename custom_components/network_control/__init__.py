@@ -6,7 +6,7 @@ from homeassistant.components.http import StaticPathConfig
 
 DOMAIN = "network_control"
 CARD_PATH = "/network_control/network-control.js"
-CARD_URL = f"{CARD_PATH}?v=1.4.1"
+CARD_URL = f"{CARD_PATH}?v=1.5.0"
 
 
 async def async_setup(hass, config):

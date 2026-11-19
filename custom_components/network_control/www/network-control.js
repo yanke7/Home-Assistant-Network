@@ -525,7 +525,10 @@
                 : entity
                   ? "No reading"
                   : missing;
-      const content = `<span>${esc(label || entity?.attributes.friendly_name || id)}</span><span>${esc(value)}</span>`;
+      const percent = Number(entity?.state);
+      const meter = unit === "%" && available(entity) && Number.isFinite(percent)
+        ? `<i class="usage-meter" aria-hidden="true" style="--fill:${Math.min(100, Math.max(0, percent))}%"></i>` : "";
+      const content = `<span>${esc(label || entity?.attributes.friendly_name || id)}</span><span>${meter}${esc(value)}</span>`;
       return entity
         ? `<button class="reading" data-entity="${esc(id)}">${content}</button>`
         : `<div class="reading">${content}</div>`;
