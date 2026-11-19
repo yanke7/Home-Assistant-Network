@@ -12,6 +12,16 @@
         })[c],
     );
   const stylesheet = new URL("./network-control.css", import.meta.url).href;
+  const themes = {
+    network: ["Network Control", "#101722", "#68def0"],
+    steel: ["Brushed Steel", "#292c30", "#ad9aff"],
+    relay: ["Amber Relay", "#24291f", "#ffbd5d"],
+    neon: ["Neon Grid", "#070d20", "#fd86e6"],
+    abyss: ["Midnight Drift", "#0b1022", "#77f1ff"],
+    tide: ["Aqua Current", "#0b384b", "#7dffde"],
+    appearance: ["Follow Appearance", "#26382d", "#a6c48a"],
+  };
+  const themeKey = "network-control.theme";
   const speedDefaults = [
     "sensor.speedtest_download",
     "sensor.speedtest_upload",
@@ -342,6 +352,15 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
+      this.theme = "network";
+      try {
+        const saved = localStorage.getItem(themeKey);
+        if (Object.hasOwn(themes, saved)) this.theme = saved;
+      } catch { /* Keep the default when browser storage is disabled. */ }
+      this.syncAppearance = () => {
+        if (this.theme === "appearance" && this._hass)
+          window.YankeAppearance?.apply(this.root?.querySelector(".shell"), this._hass);
+      };
       this.reg = {};
       this.scan = {
         tab: "devices",
@@ -427,10 +446,12 @@
         this.build();
         this.loadRegistry().then(() => this.loadActivity());
       }
+      this.syncAppearance();
       this.update();
       this.renderScan();
     }
     connectedCallback() {
+      window.addEventListener("yanke-appearance-ready", this.syncAppearance);
       if (this.root) this.applyOrder();
       this.timer = setInterval(() => {
         if (this._hass) {
@@ -445,6 +466,7 @@
       }, 60000);
     }
     disconnectedCallback() {
+      window.removeEventListener("yanke-appearance-ready", this.syncAppearance);
       clearInterval(this.timer);
       clearInterval(this.scanTimer);
     }
@@ -460,7 +482,7 @@
         : "—";
     }
     build() {
-      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
+      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><button type="button" class="theme-button">Themes</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
         ["online", "Online", "ok"],
         ["offline", "Dropped off", "warn"],
         ["unnamed", "Unnamed", ""],
@@ -478,6 +500,7 @@
  <section class="panel" id="actions-panel"><div class="heading"><h2>Network controls</h2></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
  </div></div></div></div>`;
       this.root = this.shadowRoot;
+      this.setupThemes();
       this.root.getElementById("scansearch").addEventListener("input", (e) => {
         this.scan.q = e.target.value.trim().toLowerCase();
         this.renderScan(true);
@@ -498,6 +521,35 @@
         (id) =>
           this._hass.entities?.[id]?.platform === platform && pattern.test(id),
       );
+    }
+    setupThemes() {
+      const shell = this.root.querySelector(".shell");
+      const trigger = shell.querySelector(".theme-button");
+      const dialog = document.createElement("dialog");
+      dialog.className = "theme-dialog";
+      dialog.setAttribute("aria-label", "Network Control themes");
+      dialog.innerHTML = `<form method="dialog"><div class="theme-heading"><strong>Themes</strong><button type="submit" autofocus>Close</button></div></form>
+        <div class="theme-choices">${Object.entries(themes).map(([id, [name, background, accent]]) =>
+          `<button type="button" data-theme-choice="${id}"><span aria-hidden="true" style="--swatch-bg:${background};--swatch-accent:${accent}"></span>${name}</button>`).join("")}</div>`;
+      shell.append(dialog);
+      const apply = () => {
+        shell.removeAttribute("style");
+        shell.dataset.theme = this.theme;
+        this.syncAppearance();
+        for (const button of dialog.querySelectorAll("[data-theme-choice]"))
+          button.setAttribute("aria-pressed", button.dataset.themeChoice === this.theme);
+      };
+      trigger.addEventListener("click", () => dialog.showModal());
+      dialog.addEventListener("close", () => trigger.focus());
+      dialog.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-theme-choice]");
+        if (!button) return;
+        this.theme = button.dataset.themeChoice;
+        try { localStorage.setItem(themeKey, this.theme); } catch { /* Keep the current choice. */ }
+        apply();
+        dialog.close();
+      });
+      apply();
     }
     reading(label, id) {
       const entity = this.state(id);

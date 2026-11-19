@@ -1059,3 +1059,37 @@ summary {
   .head-right .topline { flex-wrap:wrap; justify-content:flex-end }
   .head-right .ip { color:var(--yanke-text); font-variant-numeric:tabular-nums }
 }
+
+.shell[data-theme="steel"] { --yanke-bg:#292c30; --yanke-surface:#343840; --yanke-accent:#ad9aff; --yanke-line:#737a85 }
+.shell[data-theme="relay"] { --yanke-bg:#24291f; --yanke-surface:#313428; --yanke-accent:#ffbd5d; --yanke-line:#82745a }
+.shell[data-theme="neon"] { --yanke-bg:#070d20; --yanke-surface:#101934; --yanke-accent:#fd86e6; --yanke-line:#238493 }
+.shell[data-theme="abyss"] { --yanke-bg:#0b1022; --yanke-surface:#181f3a; --yanke-accent:#77f1ff; --yanke-line:#626bd2 }
+.shell[data-theme="tide"] { --yanke-bg:#0b384b; --yanke-surface:#11485c; --yanke-accent:#7dffde; --yanke-line:#47a7b8 }
+.shell:is([data-theme="steel"],[data-theme="relay"],[data-theme="neon"],[data-theme="abyss"],[data-theme="tide"]) {
+  --yanke-raised: color-mix(in srgb, var(--yanke-surface) 85%, var(--yanke-accent));
+}
+.shell[data-theme="appearance"] {
+  font-family:var(--yanke-font);
+  color:var(--yanke-text);
+}
+.head-right { flex-wrap:wrap; justify-content:flex-end; gap:6px }
+.theme-button,.theme-dialog button {
+  color:var(--yanke-text);
+  background:var(--yanke-raised);
+  border:1px solid var(--yanke-line);
+  border-radius:7px;
+  padding:4px 9px;
+}
+.theme-dialog {
+  color:var(--yanke-text);
+  background:var(--yanke-surface);
+  border:1px solid var(--yanke-line);
+  border-radius:12px;
+  width:min(420px, calc(100% - 36px));
+}
+.theme-dialog::backdrop { background:#060a11aa }
+.theme-heading { display:flex; justify-content:space-between; align-items:center }
+.theme-choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:12px }
+.theme-choices button { display:flex; align-items:center; text-align:left; gap:7px }
+.theme-choices button[aria-pressed="true"] { outline:2px solid var(--yanke-accent); outline-offset:-2px }
+.theme-choices span { width:20px; height:20px; flex:none; border:1px solid var(--yanke-line); border-radius:4px; background:linear-gradient(140deg,var(--swatch-bg) 60%,var(--swatch-accent) 61%) }
