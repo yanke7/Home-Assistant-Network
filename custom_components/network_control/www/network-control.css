@@ -1244,3 +1244,15 @@ summary {
   .instrument-4 .instrument-display strong {font-size:16px}
   .instrument-4 .instrument-history {height:24px}
 }
+
+@media (min-width:1000px) and (min-height:680px) and (max-height:790px) {
+  #host {
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-rows:minmax(0,1fr) auto;
+    column-gap:5px;
+  }
+  .host-instrument:not(.instrument-4) {
+    grid-template-rows:auto minmax(0,1fr) minmax(24px,25%);
+  }
+  .instrument-label {font-size:10px}
+}
