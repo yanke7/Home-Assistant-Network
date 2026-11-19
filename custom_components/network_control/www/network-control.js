@@ -393,7 +393,7 @@
       dialog.setAttribute("aria-label", "Network Control settings");
       dialog.innerHTML = `<form method="dialog"><div class="theme-heading"><strong>Settings</strong><button type="submit" autofocus>Close</button></div></form>
         <h3>Theme</h3><div class="theme-choices">${Object.entries(themes).map(([id, [name, background, accent]]) =>
-          `<button type="button" data-theme-choice="${id}"><span aria-hidden="true" style="--swatch-bg:${background};--swatch-accent:${accent}"></span>${name}</button>`).join("")}</div><form class="speed-settings" hidden><h3>Automatic speed tests</h3><label>Interval in minutes <input type="number" min="0" max="10080" step="1" required disabled></label><button type="submit" disabled>Save interval</button><small>Enter 0 for manual tests only.</small><div role="status"></div></form>`;
+          `<button type="button" data-theme-choice="${id}"><span aria-hidden="true" style="--swatch-bg:${background};--swatch-accent:${accent}"></span>${name}</button>`).join("")}</div><form class="speed-settings" hidden><h3>Automatic speed tests</h3><label>Interval in minutes <input type="number" min="0" max="10080" step="1" required disabled></label><button type="submit" disabled>Save interval</button><small>Enter 0 for manual tests only.</small><div role="status"></div></form><a class="automation-examples" href="https://github.com/yanke7/Home-Assistant-Network/blob/main/docs/automations.md" target="_blank" rel="noopener noreferrer">Automation examples ↗</a>`;
       shell.append(dialog);
       this.setupSpeedInterval(dialog);
       const apply = () => {

@@ -1622,3 +1622,15 @@ summary {
   .scanbar .tabs {max-width:100%}
   .scanbar .search {flex:1 1 130px;min-width:0}
 }
+
+.theme-dialog .automation-examples {
+  display:inline-block;
+  margin-top:14px;
+  padding:5px 10px;
+  border:1px solid var(--yanke-line);
+  border-radius:7px;
+  background:var(--yanke-raised);
+  color:var(--yanke-text);
+  text-decoration:none;
+}
+.theme-dialog .automation-examples:hover {border-color:var(--yanke-accent)}
