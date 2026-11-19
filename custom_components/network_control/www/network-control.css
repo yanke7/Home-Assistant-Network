@@ -1022,7 +1022,7 @@ summary {
   .shell:not(:has(.inline-edit:not([hidden]))) header {margin-bottom: 6px}
   .grid:has(> .scan:not([hidden])):has(#dns-panel[hidden]):has(#remote-panel[hidden]) {
     grid-template-columns: repeat(2,minmax(0,1fr)) minmax(0,1.35fr);
-    grid-template-rows: minmax(65px,.55fr) minmax(116px,.9fr) repeat(2,minmax(0,1.15fr));
+    grid-template-rows: clamp(72px,10vh,94px) max-content minmax(0,1fr) minmax(0,1.1fr);
     height: calc(100dvh - 134px);
   }
   .grid:has(#dns-panel[hidden]):has(#remote-panel[hidden]) > .scan {
