@@ -500,7 +500,7 @@
         .join(
           "",
         )}</div><div class="scanbar"><div class="tabs"><button data-tab="devices" class="on">Devices</button><button data-tab="activity">Activity</button></div><input class="search" id="scansearch" type="search" placeholder="Filter devices" aria-label="Filter devices"></div><div id="pending"></div><div class="scanlist" id="scanlist"><div class="none">Loading devices…</div></div><div class="scanfoot"><span id="scanfoot"></span><span id="scanerr"></span></div></section><div class="support" id="support">
- <section class="panel" id="host-panel"><div class="heading"><h2>Host health</h2></div><div id="host" class="readings"></div></section>
+ <section class="panel" id="host-panel"><div class="heading"><h2>Host health</h2><span class="tag">24-hour history</span></div><div id="host" class="readings"></div></section>
  <section class="panel" id="dns-panel"><div class="heading"><h2>DNS &amp; ad blocking</h2></div><div id="dns" class="readings"></div></section>
  <section class="panel" id="remote-panel"><div class="heading"><h2>Remote access &amp; SSL</h2></div><div id="remote" class="readings"></div></section>
  <section class="panel" id="actions-panel"><div class="heading"><h2>Network controls</h2></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
@@ -938,7 +938,7 @@
         .getElementById("main")
         .classList.toggle("single-column", sideHidden || connectionHidden);
 
-      const hostHidden = this.updateSection("host", "host-panel", "host", [
+      const hostRows = [
         [
           "CPU usage",
           config.cpu_sensor ||
@@ -964,7 +964,10 @@
             this.discovered("systemmonitor", /_last_boot$/) ||
             this.discovered("uptime", /^sensor\./),
         ],
-      ]);
+      ];
+      const hostHidden = this.sectionHidden("host", hostRows.some(([, id]) => this.state(id)));
+      hide("host-panel", hostHidden);
+      if (!hostHidden) this.renderHostHealth(hostRows);
       const dnsPlatform = ["adguard", "pi_hole"].find((platform) =>
         this.discovered(platform, /_(dns_)?queries(?:_today)?$/),
       );
@@ -1010,6 +1013,78 @@
         "support",
         hostHidden && dnsHidden && remoteHidden && controlsHidden,
       );
+    }
+    renderHostHealth(rows) {
+      const ids = rows.map(([, id]) => id).filter((id) => this.state(id));
+      const key = ids.join(",");
+      if (this.hostHistoryKey !== key || Date.now() - (this.hostHistoryAt || 0) >= 300000) {
+        this.hostHistoryKey = key;
+        this.hostHistoryAt = Date.now();
+        this.hostHistory = this.hostHistory?.key === key ? this.hostHistory : { key, series: {} };
+        if (key) this.fetchHostHistory(ids, key);
+      }
+      const diskUseId = rows[2][1]?.replace(/_disk_free(?=_|$)/, "_disk_use");
+      const diskUse = diskUseId !== rows[2][1] ? this.state(diskUseId) : null;
+      const markup = rows.map(([label, id], index) => {
+        const state = this.state(id);
+        const unit = state?.attributes.unit_of_measurement || "";
+        const number = Number(state?.state);
+        const numeric = available(state) && Number.isFinite(number);
+        const boot = index === 4 && !numeric ? Date.parse(state?.state) : NaN;
+        const minutes = Math.max(0, Math.floor((Date.now() - boot) / 60000));
+        const value = Number.isFinite(boot)
+          ? `${Math.floor(minutes / 1440)}d ${Math.floor(minutes / 60) % 24}h ${minutes % 60}m`
+          : available(state) ? `${state.state}${unit === "%" ? "%" : unit ? " " + unit : ""}` : "—";
+        let fraction = numeric && unit === "%" ? number / 100 : null;
+        if (index === 2 && numeric && available(diskUse) && diskUse.attributes.unit_of_measurement === "%")
+          fraction = 1 - Number(diskUse.state) / 100;
+        if (index === 3 && numeric && ["°C", "°F"].includes(unit))
+          fraction = (unit === "°F" ? (number - 32) * 5 / 9 : number) / 100;
+        const fill = Number.isFinite(fraction) ? Math.max(0, Math.min(1, fraction)) : 0;
+        const graph = this.hostHistory.series[id] || "";
+        return `<button type="button" class="host-instrument instrument-${index}" ${state ? `data-entity="${esc(id)}"` : "disabled"}>
+          <span class="instrument-label">${esc(label)}</span>
+          <span class="instrument-display"><i class="instrument-arc" aria-hidden="true" style="--level:${fill}"></i><strong>${esc(value)}</strong></span>
+          ${graph || `<span class="instrument-empty">${state ? "No history yet" : "Entity not configured"}</span>`}
+        </button>`;
+      }).join("");
+      this.renderMarkup("host", markup);
+    }
+    async fetchHostHistory(ids, key) {
+      const end = Date.now();
+      const start = end - 86400000;
+      const series = {};
+      try {
+        const rows = await this._hass.callApi("GET", `history/period/${new Date(start).toISOString()}?filter_entity_id=${encodeURIComponent(ids.join(","))}&end_time=${new Date(end).toISOString()}&minimal_response&no_attributes`);
+        for (const records of rows) {
+          const id = records[0]?.entity_id;
+          if (!id) continue;
+          const points = records.map((record) => {
+            const time = Date.parse(record.last_changed || record.last_updated);
+            const value = record.state?.trim() ? Number(record.state) : NaN;
+            const boot = Date.parse(record.state);
+            return [time, Number.isFinite(value) ? value : (time - boot) / 3600000];
+          });
+          if (points.length && Number.isFinite(points.at(-1)[1])) {
+            const boot = Date.parse(records.at(-1).state);
+            points.push([end, Number.isFinite(Number(records.at(-1).state)) ? points.at(-1)[1] : (end - boot) / 3600000]);
+          }
+          const values = points.filter(([time, value]) => Number.isFinite(time + value)).map(([, value]) => value);
+          if (!values.length) continue;
+          const low = Math.min(...values), range = Math.max(1, Math.max(...values) - low);
+          let pen = false;
+          const path = points.map(([time, value]) => {
+            if (!Number.isFinite(time + value)) { pen = false; return ""; }
+            const command = pen ? "L" : "M";
+            pen = true;
+            return command + Math.max(0, Math.min(200, (time - start) * 200 / 86400000)).toFixed(1) + "," + (19 - (value - low) * 16 / range).toFixed(1);
+          }).join(" ");
+          series[id] = `<svg class="instrument-history" viewBox="0 0 200 22" preserveAspectRatio="none" role="img" aria-label="24-hour history"><path d="${path}" vector-effect="non-scaling-stroke"/></svg>`;
+        }
+      } catch { /* Keep the live gauges usable when Recorder history is unavailable. */ }
+      if (this.hostHistoryKey !== key) return;
+      this.hostHistory = { key, series };
+      this.update();
     }
     actions() {
       const config = this.config;
