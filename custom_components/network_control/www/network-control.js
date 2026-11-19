@@ -560,7 +560,7 @@
       return hidden;
     }
     dashboardEditor() {
-      if (this.preview) return null;
+      // Home Assistant also marks cards in dashboard edit mode as previews.
       for (
         let node = this.parentNode;
         node;
