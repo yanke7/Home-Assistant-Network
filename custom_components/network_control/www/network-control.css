@@ -1574,3 +1574,17 @@ summary {
   .shell .head-right .ip {font-size:11px;overflow-wrap:anywhere}
   .shell .head-right :is(#router,.ip):empty {display:none}
 }
+
+.theme-dialog {max-height:calc(100dvh - 32px);overflow:auto}
+.theme-dialog h3 {margin:12px 0 6px;font-size:13px}
+.speed-settings {margin-top:14px;padding-top:4px;border-top:1px solid var(--yanke-line)}
+.speed-settings input {
+  width:5.5em;
+  margin-inline:4px;
+  padding:4px;
+  color:var(--yanke-text);
+  background:var(--yanke-bg);
+  border:1px solid var(--yanke-line);
+  border-radius:5px;
+}
+.speed-settings small,.speed-settings [role="status"] {display:block;margin-top:5px}

@@ -328,7 +328,7 @@
         : "—";
     }
     build() {
-      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><span class="trek-ops">Primary Ops</span><button type="button" class="theme-button">Themes</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
+      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><span class="trek-ops">Primary Ops</span><button type="button" class="theme-button">Settings</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
         ["online", "Online", "ok"],
         ["offline", "Dropped off", "warn"],
         ["unnamed", "Unnamed", ""],
@@ -346,7 +346,7 @@
  <section class="panel" id="actions-panel"><div class="heading"><h2>Network controls</h2></div><div id="actions" class="actions"></div><div class="feedback" id="feedback" role="status"></div></section>
  </div></div></div></div>`;
       this.root = this.shadowRoot;
-      this.setupThemes();
+      this.setupSettings();
       this.setupHostTooltip();
       this.root.getElementById("scansearch").addEventListener("input", (e) => {
         this.scan.q = e.target.value.trim().toLowerCase();
@@ -369,16 +369,17 @@
           this._hass.entities?.[id]?.platform === platform && pattern.test(id),
       );
     }
-    setupThemes() {
+    setupSettings() {
       const shell = this.root.querySelector(".shell");
       const trigger = shell.querySelector(".theme-button");
       const dialog = document.createElement("dialog");
       dialog.className = "theme-dialog";
-      dialog.setAttribute("aria-label", "Network Control themes");
-      dialog.innerHTML = `<form method="dialog"><div class="theme-heading"><strong>Themes</strong><button type="submit" autofocus>Close</button></div></form>
-        <div class="theme-choices">${Object.entries(themes).map(([id, [name, background, accent]]) =>
-          `<button type="button" data-theme-choice="${id}"><span aria-hidden="true" style="--swatch-bg:${background};--swatch-accent:${accent}"></span>${name}</button>`).join("")}</div>`;
+      dialog.setAttribute("aria-label", "Network Control settings");
+      dialog.innerHTML = `<form method="dialog"><div class="theme-heading"><strong>Settings</strong><button type="submit" autofocus>Close</button></div></form>
+        <h3>Theme</h3><div class="theme-choices">${Object.entries(themes).map(([id, [name, background, accent]]) =>
+          `<button type="button" data-theme-choice="${id}"><span aria-hidden="true" style="--swatch-bg:${background};--swatch-accent:${accent}"></span>${name}</button>`).join("")}</div><form class="speed-settings" hidden><h3>Automatic speed tests</h3><label>Interval in minutes <input type="number" min="0" max="10080" step="1" required disabled></label><button type="submit" disabled>Save interval</button><small>Enter 0 for manual tests only.</small><div role="status"></div></form>`;
       shell.append(dialog);
+      this.setupSpeedInterval(dialog);
       const apply = () => {
         shell.removeAttribute("style");
         shell.dataset.theme = this.theme;
@@ -397,6 +398,65 @@
         dialog.close();
       });
       apply();
+    }
+    setupSpeedInterval(dialog) {
+      const form = dialog.querySelector(".speed-settings");
+      const input = form.querySelector("input");
+      const save = form.querySelector("button");
+      const status = form.querySelector('[role="status"]');
+      const endpoint = "config/config_entries/options/flow";
+      let flow;
+      let opening = 0;
+      const discard = (id) => this._hass.callApi("DELETE", `${endpoint}/${id}`).catch(() => {});
+      dialog.addEventListener("close", () => {
+        opening++;
+        if (flow) discard(flow);
+        flow = null;
+      });
+      this.root.querySelector(".theme-button").addEventListener("click", async () => {
+        form.hidden = !this._hass.user?.is_admin;
+        if (form.hidden) return;
+        const request = ++opening;
+        input.disabled = save.disabled = true;
+        status.textContent = "Loading interval…";
+        try {
+          const entries = await this._hass.callWS({ type: "config_entries/get", domain: "network_control" });
+          const entry = entries.find((item) => item.state === "loaded" && item.supports_options);
+          if (!entry) throw Error("Options unavailable");
+          const result = await this._hass.callApi("POST", endpoint, { handler: entry.entry_id });
+          if (request !== opening || !dialog.open) {
+            if (result.flow_id) discard(result.flow_id);
+            return;
+          }
+          flow = result.flow_id;
+          const field = result.data_schema?.find((item) => item.name === "speed_test_interval");
+          if (!field || result.type !== "form") throw Error("Options unavailable");
+          input.value = field.default ?? 60;
+          input.disabled = save.disabled = false;
+          status.textContent = "";
+        } catch {
+          if (request === opening) status.textContent = "Speed test schedule unavailable.";
+        }
+      });
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!flow) return;
+        const request = opening;
+        const id = flow;
+        flow = null;
+        input.disabled = save.disabled = true;
+        status.textContent = "Saving…";
+        try {
+          const result = await this._hass.callApi("POST", `${endpoint}/${id}`, {
+            speed_test_interval: input.valueAsNumber,
+          });
+          if (result.type !== "create_entry") throw Error("Save incomplete");
+          if (request === opening) status.textContent = "Interval saved.";
+        } catch {
+          discard(id);
+          if (request === opening) status.textContent = "Could not save. Reopen Settings to try again.";
+        }
+      });
     }
     reading(label, id) {
       const entity = this.state(id);
