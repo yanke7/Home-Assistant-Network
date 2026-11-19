@@ -32,6 +32,24 @@ latency_max_ms: 500
 
 ![Network Control dashboard with demo data](docs/themes/network.webp)
 
+### More themes on desktop
+<table>
+<tr><th>Star Trek</th><th>Mac Control</th></tr>
+<tr><td><a href="docs/themes/trek.webp"><img src="docs/themes/trek.webp" alt="Star Trek dashboard on desktop" width="480"></a></td><td><a href="docs/themes/mac.webp"><img src="docs/themes/mac.webp" alt="Mac Control dashboard on desktop" width="480"></a></td></tr>
+<tr><th>Neon Grid</th><th>Aqua Current</th></tr>
+<tr><td><a href="docs/themes/neon.webp"><img src="docs/themes/neon.webp" alt="Neon Grid dashboard on desktop" width="480"></a></td><td><a href="docs/themes/tide.webp"><img src="docs/themes/tide.webp" alt="Aqua Current dashboard on desktop" width="480"></a></td></tr>
+</table>
+
+### On a phone
+<table>
+<tr><th>Network Control</th><th>Star Trek</th><th>Mac Control</th></tr>
+<tr>
+<td><a href="docs/themes/network-mobile.webp"><img src="docs/themes/network-mobile.webp" alt="Network Control dashboard on a phone" width="180"></a></td>
+<td><a href="docs/themes/trek-mobile.webp"><img src="docs/themes/trek-mobile.webp" alt="Star Trek dashboard on a phone" width="180"></a></td>
+<td><a href="docs/themes/mac-mobile.webp"><img src="docs/themes/mac-mobile.webp" alt="Mac Control dashboard on a phone" width="180"></a></td>
+</tr>
+</table>
+
 [Browse screenshots of all nine themes](docs/theme-gallery.md)
 
 ## Install
