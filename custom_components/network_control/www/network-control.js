@@ -643,7 +643,7 @@
         ],
         [
           "RAM usage",
-          config.memory_sensor || this.hostSensor("host_ram") ||
+          config.memory_sensor || this.hostSensor("host_memory") ||
             this.discovered("systemmonitor", /_memory_usage$/),
         ],
         [
@@ -652,12 +652,12 @@
         ],
         [
           "CPU temperature",
-          config.temperature_sensor || this.hostSensor("host_temperature") ||
+          config.temperature_sensor || this.hostSensor("host_cpu_temperature") ||
             this.discovered("systemmonitor", /_processor_temperature$/),
         ],
         [
           "System uptime",
-          config.uptime_sensor || this.hostSensor("host_boot") ||
+          config.uptime_sensor || this.hostSensor("host_boot_time") ||
             this.discovered("systemmonitor", /_last_boot$/) ||
             this.discovered("uptime", /^sensor\./),
         ],
