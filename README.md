@@ -32,6 +32,13 @@ All screenshots use fictional devices and sample readings.
 
 ![Mac Control theme on desktop](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac.webp)
 
+<table>
+<tr><th>Brushed Steel</th><th>Amber Relay</th><th>Neon Grid</th></tr>
+<tr><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel.webp" alt="Brushed Steel desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay.webp" alt="Amber Relay desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon.webp" alt="Neon Grid desktop theme" width="300"></a></td></tr>
+<tr><th>Midnight Drift</th><th>Aqua Current</th><th>Follow Appearance</th></tr>
+<tr><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss.webp" alt="Midnight Drift desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide.webp" alt="Aqua Current desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance.webp" alt="Follow Appearance desktop theme" width="300"></a></td></tr>
+</table>
+
 [View all nine desktop and mobile themes](https://github.com/yanke7/Home-Assistant-Network/blob/main/docs/theme-gallery.md)
 
 ## Why use Network Control?
