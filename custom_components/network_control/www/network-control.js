@@ -23,6 +23,95 @@
     trek: ["Star Trek", "#080706", "#ffcc66"],
     appearance: ["Follow Appearance", "#26382d", "#a6c48a"],
   };
+  const languages = {"en": "English", "fr": "Français", "nl": "Nederlands", "de": "Deutsch", "es": "Español", "tl": "Tagalog", "sv": "Svenska", "it": "Italiano", "pl": "Polski", "da": "Dansk", "nb": "Norsk bokmål"};
+  // Translation columns follow the language selector order, excluding English.
+  const translations = {
+    "Speed test schedule unavailable.": ["Planification des tests indisponible.", "Testplanning niet beschikbaar.", "Testzeitplan nicht verfügbar.", "Programación de pruebas no disponible.", "Hindi makuha ang iskedyul ng pagsubok.", "Testschema saknas.", "Programmazione test non disponibile.", "Harmonogram testów niedostępny.", "Testplan ikke tilgængelig.", "Testplan utilgjengelig."],
+    "Could not save. Reopen Settings to try again.": ["Échec de l’enregistrement. Rouvrez les paramètres.", "Opslaan mislukt. Open de instellingen opnieuw.", "Speichern fehlgeschlagen. Einstellungen erneut öffnen.", "No se pudo guardar. Vuelve a abrir Ajustes.", "Hindi na-save. Buksang muli ang mga setting.", "Kunde inte spara. Öppna inställningarna igen.", "Salvataggio non riuscito. Riapri le impostazioni.", "Nie udało się zapisać. Otwórz ustawienia ponownie.", "Kunne ikke gemme. Åbn indstillinger igen.", "Kunne ikke lagre. Åpne innstillingene igjen."],
+    "Reboot host": ["Redémarrer le serveur", "Host herstarten", "Host neu starten", "Reiniciar servidor", "I-restart ang host", "Starta om värden", "Riavvia host", "Uruchom ponownie hosta", "Genstart vært", "Start verten på nytt"],
+    "Pause blocking for 5 minutes": ["Suspendre le blocage pendant 5 minutes", "Blokkering 5 minuten pauzeren", "Blockierung 5 Minuten pausieren", "Pausar bloqueo durante 5 minutos", "Ihinto ang pagharang nang 5 minuto", "Pausa blockering i 5 minuter", "Sospendi il blocco per 5 minuti", "Wstrzymaj blokowanie na 5 minut", "Sæt blokering på pause i 5 minutter", "Sett blokkering på pause i 5 minutter"],
+    "Wake device": ["Réveiller l’appareil", "Apparaat wekken", "Gerät aufwecken", "Activar dispositivo", "Gisingin ang aparato", "Väck enhet", "Riattiva dispositivo", "Wybudź urządzenie", "Væk enhed", "Vekk enhet"],
+    "Select summary": ["Sélectionner le résumé", "Overzicht selecteren", "Übersicht auswählen", "Seleccionar resumen", "Piliin ang buod", "Markera sammanfattning", "Seleziona riepilogo", "Zaznacz podsumowanie", "Vælg oversigt", "Velg sammendrag"],
+    "History unavailable": ["Historique indisponible", "Geschiedenis niet beschikbaar", "Verlauf nicht verfügbar", "Historial no disponible", "Walang makuhang kasaysayan", "Historik saknas", "Cronologia non disponibile", "Historia niedostępna", "Historik ikke tilgængelig", "Historikk utilgjengelig"],
+    "Follow Appearance": ["Suivre l’apparence", "Uiterlijk volgen", "Darstellung übernehmen", "Seguir apariencia", "Sundin ang hitsura", "Följ utseende", "Segui aspetto", "Użyj ustawień wyglądu", "Følg udseende", "Følg utseende"],
+    "Joined": ["Connecté", "Verbonden", "Verbunden", "Conectado", "Kumonekta", "Ansluten", "Connesso", "Połączono", "Tilsluttet", "Tilkoblet"],
+    "Dropped": ["Déconnecté", "Verbinding verbroken", "Getrennt", "Desconectado", "Nadiskonekta", "Frånkopplad", "Disconnesso", "Rozłączono", "Afbrudt", "Frakoblet"],
+    "No devices joined or dropped off in the last 24 hours.": ["Aucune connexion ou déconnexion depuis 24 h.", "Geen apparaten verbonden of verbroken in de afgelopen 24 uur.", "Keine Gerätewechsel in den letzten 24 Stunden.", "Ningún dispositivo se conectó o desconectó en las últimas 24 horas.", "Walang aparatong kumonekta o nadiskonekta sa huling 24 oras.", "Inga enheter anslöts eller kopplades från under de senaste 24 timmarna.", "Nessun dispositivo connesso o disconnesso nelle ultime 24 ore.", "Żadne urządzenie nie połączyło się ani nie rozłączyło w ciągu ostatniej doby.", "Ingen enheder blev tilsluttet eller afbrudt de seneste 24 timer.", "Ingen enheter ble tilkoblet eller frakoblet de siste 24 timene."],
+    "DNS queries": ["Requêtes DNS", "DNS-verzoeken", "DNS-Anfragen", "Consultas DNS", "Mga kahilingang DNS", "DNS-frågor", "Richieste DNS", "Zapytania DNS", "DNS-forespørgsler", "DNS-forespørsler"],
+    "Ads blocked": ["Publicités bloquées", "Geblokkeerde advertenties", "Blockierte Werbung", "Anuncios bloqueados", "Mga naharang na ad", "Blockerade annonser", "Annunci bloccati", "Zablokowane reklamy", "Blokerede annoncer", "Blokkerte annonser"],
+    "Remote access": ["Accès distant", "Externe toegang", "Fernzugriff", "Acceso remoto", "Malayuang access", "Fjärråtkomst", "Accesso remoto", "Dostęp zdalny", "Fjernadgang", "Fjerntilgang"],
+    "SSL certificate": ["Certificat SSL", "SSL-certificaat", "SSL-Zertifikat", "Certificado SSL", "Sertipiko ng SSL", "SSL-certifikat", "Certificato SSL", "Certyfikat SSL", "SSL-certifikat", "SSL-sertifikat"],
+    "Tracked devices": ["Appareils suivis", "Gevolgde apparaten", "Verfolgte Geräte", "Dispositivos seguidos", "Mga sinusubaybayang aparato", "Spårade enheter", "Dispositivi monitorati", "Śledzone urządzenia", "Sporede enheder", "Sporede enheter"],
+    "Last sweep": ["Dernière analyse", "Laatste scan", "Letzter Scan", "Último escaneo", "Huling pag-scan", "Senaste skanning", "Ultima scansione", "Ostatni skan", "Seneste scanning", "Siste skanning"],
+    "New devices awaiting tracking": ["Nouveaux appareils à suivre", "Nieuwe apparaten om te volgen", "Neue Geräte zur Verfolgung", "Dispositivos nuevos sin seguimiento", "Mga bagong aparato na hindi pa sinusubaybayan", "Nya enheter att spåra", "Nuovi dispositivi da monitorare", "Nowe urządzenia do śledzenia", "Nye enheder til sporing", "Nye enheter å spore"],
+    "suggested": ["suggéré", "voorgesteld", "vorgeschlagen", "sugerido", "iminungkahi", "föreslagen", "suggerito", "sugerowane", "foreslået", "foreslått"],
+    "Not tracked": ["Non suivi", "Niet gevolgd", "Nicht verfolgt", "Sin seguimiento", "Hindi sinusubaybayan", "Spåras inte", "Non monitorato", "Nieśledzone", "Ikke sporet", "Ikke sporet"],
+    "Interval saved.": ["Intervalle enregistré.", "Interval opgeslagen.", "Intervall gespeichert.", "Intervalo guardado.", "Na-save ang agwat.", "Intervallet sparat.", "Intervallo salvato.", "Zapisano odstęp.", "Interval gemt.", "Intervall lagret."],
+    "Saving…": ["Enregistrement…", "Opslaan…", "Wird gespeichert…", "Guardando…", "Sine-save…", "Sparar…", "Salvataggio…", "Zapisywanie…", "Gemmer…", "Lagrer…"],
+    "Loading interval…": ["Chargement de l’intervalle…", "Interval laden…", "Intervall wird geladen…", "Cargando intervalo…", "Nilo-load ang agwat…", "Läser in intervall…", "Caricamento intervallo…", "Wczytywanie odstępu…", "Indlæser interval…", "Laster intervall…"],
+    "Manage personal devices": ["Gérer les appareils personnels", "Persoonlijke apparaten beheren", "Persönliche Geräte verwalten", "Gestionar dispositivos personales", "Pamahalaan ang mga personal na aparato", "Hantera personliga enheter", "Gestisci dispositivi personali", "Zarządzaj urządzeniami osobistymi", "Administrer personlige enheder", "Administrer personlige enheter"],
+    "Manage network controls": ["Gérer les commandes réseau", "Netwerkbediening beheren", "Netzwerksteuerung verwalten", "Gestionar controles de red", "Pamahalaan ang mga kontrol ng network", "Hantera nätverkskontroller", "Gestisci controlli di rete", "Zarządzaj sterowaniem siecią", "Administrer netværksstyring", "Administrer nettverkskontroller"],
+    "Search names or entity IDs": ["Rechercher un nom ou un ID d’entité", "Zoek namen of entiteits-ID’s", "Namen oder Entitäts-IDs suchen", "Buscar nombres o ID de entidades", "Maghanap ng pangalan o entity ID", "Sök namn eller entitets-ID", "Cerca nomi o ID entità", "Szukaj nazw lub identyfikatorów encji", "Søg navne eller entitets-id’er", "Søk etter navn eller entitets-ID-er"],
+    "Recorded speed tests · Mbps left / ms right · Latency above {cap} ms omitted": ["Tests enregistrés · Mbit/s à gauche / ms à droite · Latences supérieures à {cap} ms exclues", "Opgeslagen tests · Mbps links / ms rechts · Latentie boven {cap} ms weggelaten", "Gespeicherte Tests · Mbit/s links / ms rechts · Latenz über {cap} ms ausgeblendet", "Pruebas registradas · Mbps a la izquierda / ms a la derecha · Se omite la latencia superior a {cap} ms", "Mga naitalang pagsubok · Mbps sa kaliwa / ms sa kanan · Hindi kasama ang lampas {cap} ms", "Sparade tester · Mbit/s till vänster / ms till höger · Latens över {cap} ms utelämnas", "Test registrati · Mbps a sinistra / ms a destra · Latenza oltre {cap} ms esclusa", "Zapisane testy · Mb/s po lewej / ms po prawej · Pominięto opóźnienia powyżej {cap} ms", "Gemte test · Mbit/s til venstre / ms til højre · Latenstid over {cap} ms udeladt", "Lagrede tester · Mbit/s til venstre / ms til høyre · Forsinkelse over {cap} ms utelatt"],
+    "No devices match this filter.": ["Aucun appareil correspondant.", "Geen overeenkomende apparaten.", "Keine passenden Geräte.", "Ningún dispositivo coincide.", "Walang tumutugmang aparato.", "Inga enheter matchar.", "Nessun dispositivo corrispondente.", "Brak pasujących urządzeń.", "Ingen enheder matcher.", "Ingen samsvarende enheter."],
+    "No new devices awaiting tracking.": ["Aucun nouvel appareil à suivre.", "Geen nieuwe apparaten om te volgen.", "Keine neuen Geräte zur Verfolgung.", "No hay dispositivos nuevos sin seguimiento.", "Walang bagong aparatong susubaybayan.", "Inga nya enheter att spåra.", "Nessun nuovo dispositivo da monitorare.", "Brak nowych urządzeń do śledzenia.", "Ingen nye enheder til sporing.", "Ingen nye enheter å spore."],
+    "Reboot router": ["Redémarrer le routeur", "Router herstarten", "Router neu starten", "Reiniciar router", "I-restart ang router", "Starta om routern", "Riavvia router", "Uruchom ponownie router", "Genstart router", "Start ruteren på nytt"],
+    "Toggle guest Wi-Fi": ["Activer/désactiver le Wi-Fi invité", "Gastwifi omschakelen", "Gast-WLAN umschalten", "Alternar Wi-Fi de invitados", "I-toggle ang Wi-Fi ng bisita", "Växla gäst-Wi-Fi", "Attiva/disattiva Wi-Fi ospiti", "Przełącz Wi-Fi dla gości", "Skift gæste-wifi", "Bytt gjeste-Wi-Fi"],
+    "Settings": ["Paramètres", "Instellingen", "Einstellungen", "Ajustes", "Mga setting", "Inställningar", "Impostazioni", "Ustawienia", "Indstillinger", "Innstillinger"],
+    "Language": ["Langue", "Taal", "Sprache", "Idioma", "Wika", "Språk", "Lingua", "Język", "Sprog", "Språk"],
+    "Theme": ["Thème", "Thema", "Design", "Tema", "Tema", "Tema", "Tema", "Motyw", "Tema", "Tema"],
+    "Close": ["Fermer", "Sluiten", "Schließen", "Cerrar", "Isara", "Stäng", "Chiudi", "Zamknij", "Luk", "Lukk"],
+    "Download": ["Débit descendant", "Download", "Download", "Descarga", "Download", "Nedladdning", "Download", "Pobieranie", "Download", "Nedlasting"],
+    "Upload": ["Débit montant", "Upload", "Upload", "Subida", "Upload", "Uppladdning", "Upload", "Wysyłanie", "Upload", "Opplasting"],
+    "Latency": ["Latence", "Latentie", "Latenz", "Latencia", "Latensiya", "Latens", "Latenza", "Opóźnienie", "Latenstid", "Forsinkelse"],
+    "Connection history": ["Historique de connexion", "Verbindingsgeschiedenis", "Verbindungsverlauf", "Historial de conexión", "Kasaysayan ng koneksyon", "Anslutningshistorik", "Cronologia connessione", "Historia połączenia", "Forbindelseshistorik", "Tilkoblingshistorikk"],
+    "LAST 24 HOURS": ["24 DERNIÈRES HEURES", "AFGELOPEN 24 UUR", "LETZTE 24 STUNDEN", "ÚLTIMAS 24 HORAS", "HULING 24 ORAS", "SENASTE 24 TIMMARNA", "ULTIME 24 ORE", "OSTATNIE 24 GODZINY", "SENESTE 24 TIMER", "SISTE 24 TIMER"],
+    "24-hour history": ["Historique sur 24 h", "Geschiedenis (24 uur)", "24-Stunden-Verlauf", "Historial de 24 h", "Kasaysayan ng 24 oras", "Historik för 24 timmar", "Cronologia di 24 ore", "Historia z 24 godzin", "Historik for 24 timer", "Historikk for 24 timer"],
+    "Personal devices": ["Appareils personnels", "Persoonlijke apparaten", "Persönliche Geräte", "Dispositivos personales", "Mga personal na aparato", "Personliga enheter", "Dispositivi personali", "Urządzenia osobiste", "Personlige enheder", "Personlige enheter"],
+    "Network scanner": ["Analyseur réseau", "Netwerkscanner", "Netzwerkscanner", "Escáner de red", "Scanner ng network", "Nätverksskanner", "Scanner di rete", "Skaner sieci", "Netværksscanner", "Nettverksskanner"],
+    "Host health": ["État du serveur", "Hoststatus", "Hostzustand", "Estado del servidor", "Kalagayan ng host", "Värdstatus", "Stato del sistema", "Stan hosta", "Værtsstatus", "Vertsstatus"],
+    "Telemetry": ["Télémétrie", "Telemetrie", "Telemetrie", "Telemetría", "Telemetriya", "Telemetri", "Telemetria", "Telemetria", "Telemetri", "Telemetri"],
+    "Network controls": ["Commandes réseau", "Netwerkbediening", "Netzwerksteuerung", "Controles de red", "Mga kontrol ng network", "Nätverkskontroller", "Controlli di rete", "Sterowanie siecią", "Netværksstyring", "Nettverkskontroller"],
+    "Manage": ["Gérer", "Beheren", "Verwalten", "Gestionar", "Pamahalaan", "Hantera", "Gestisci", "Zarządzaj", "Administrer", "Administrer"],
+    "Devices": ["Appareils", "Apparaten", "Geräte", "Dispositivos", "Mga aparato", "Enheter", "Dispositivi", "Urządzenia", "Enheder", "Enheter"],
+    "Activity": ["Activité", "Activiteit", "Aktivität", "Actividad", "Aktibidad", "Aktivitet", "Attività", "Aktywność", "Aktivitet", "Aktivitet"],
+    "New devices": ["Nouveaux appareils", "Nieuwe apparaten", "Neue Geräte", "Dispositivos nuevos", "Mga bagong aparato", "Nya enheter", "Nuovi dispositivi", "Nowe urządzenia", "Nye enheder", "Nye enheter"],
+    "Online": ["En ligne", "Online", "Online", "En línea", "Online", "Anslutna", "Online", "Online", "Online", "Tilkoblet"],
+    "Dropped off": ["Déconnectés", "Verbinding verbroken", "Getrennt", "Desconectados", "Nadiskonekta", "Frånkopplade", "Disconnessi", "Rozłączone", "Afbrudt", "Frakoblet"],
+    "Unnamed": ["Sans nom", "Naamloos", "Unbenannt", "Sin nombre", "Walang pangalan", "Namnlösa", "Senza nome", "Bez nazwy", "Unavngivne", "Uten navn"],
+    "Filter devices": ["Filtrer les appareils", "Apparaten filteren", "Geräte filtern", "Filtrar dispositivos", "Salain ang mga aparato", "Filtrera enheter", "Filtra dispositivi", "Filtruj urządzenia", "Filtrer enheder", "Filtrer enheter"],
+    "Local network": ["Réseau local", "Lokaal netwerk", "Lokales Netzwerk", "Red local", "Lokal na network", "Lokalt nätverk", "Rete locale", "Sieć lokalna", "Lokalt netværk", "Lokalt nettverk"],
+    "Last speed test": ["Dernier test de débit", "Laatste snelheidstest", "Letzter Geschwindigkeitstest", "Última prueba de velocidad", "Huling pagsubok ng bilis", "Senaste hastighetstest", "Ultimo test di velocità", "Ostatni test prędkości", "Seneste hastighedstest", "Siste hastighetstest"],
+    "CPU usage": ["Utilisation CPU", "CPU-gebruik", "CPU-Auslastung", "Uso de CPU", "Paggamit ng CPU", "CPU-belastning", "Uso CPU", "Użycie CPU", "CPU-forbrug", "CPU-bruk"],
+    "RAM usage": ["Utilisation RAM", "RAM-gebruik", "RAM-Auslastung", "Uso de RAM", "Paggamit ng RAM", "RAM-användning", "Uso RAM", "Użycie RAM", "RAM-forbrug", "RAM-bruk"],
+    "Disk free": ["Espace disque libre", "Vrije schijfruimte", "Freier Speicherplatz", "Espacio libre", "Libreng espasyo", "Ledigt diskutrymme", "Spazio libero", "Wolne miejsce", "Ledig diskplads", "Ledig diskplass"],
+    "CPU temperature": ["Température CPU", "CPU-temperatuur", "CPU-Temperatur", "Temperatura de CPU", "Temperatura ng CPU", "CPU-temperatur", "Temperatura CPU", "Temperatura CPU", "CPU-temperatur", "CPU-temperatur"],
+    "System uptime": ["Temps de fonctionnement", "Systeemlooptijd", "Systemlaufzeit", "Tiempo de actividad", "Tagal ng paggana", "Drifttid", "Tempo di attività", "Czas pracy", "Oppetid", "Oppetid"],
+    "Connection snapshot": ["Aperçu de connexion", "Verbindingsoverzicht", "Verbindungsübersicht", "Resumen de conexión", "Buod ng koneksyon", "Anslutningsöversikt", "Riepilogo connessione", "Podsumowanie połączenia", "Forbindelsesoversigt", "Tilkoblingsoversikt"],
+    "Refresh history": ["Actualiser l’historique", "Geschiedenis vernieuwen", "Verlauf aktualisieren", "Actualizar historial", "I-refresh ang kasaysayan", "Uppdatera historik", "Aggiorna cronologia", "Odśwież historię", "Opdater historik", "Oppdater historikk"],
+    "Find a device": ["Rechercher un appareil", "Apparaat zoeken", "Gerät suchen", "Buscar dispositivo", "Maghanap ng aparato", "Hitta en enhet", "Cerca dispositivo", "Znajdź urządzenie", "Find en enhed", "Finn en enhet"],
+    "Recent activity": ["Activité récente", "Recente activiteit", "Letzte Aktivität", "Actividad reciente", "Kamakailang aktibidad", "Senaste aktivitet", "Attività recente", "Ostatnia aktywność", "Seneste aktivitet", "Nylig aktivitet"],
+    "Run speed test": ["Tester le débit", "Snelheid testen", "Geschwindigkeit testen", "Probar velocidad", "Subukan ang bilis", "Testa hastigheten", "Verifica velocità", "Sprawdź prędkość", "Test hastighed", "Test hastighet"],
+    "Restart Home Assistant": ["Redémarrer Home Assistant", "Home Assistant herstarten", "Home Assistant neu starten", "Reiniciar Home Assistant", "I-restart ang Home Assistant", "Starta om Home Assistant", "Riavvia Home Assistant", "Uruchom ponownie Home Assistant", "Genstart Home Assistant", "Start Home Assistant på nytt"],
+    "Automatic speed tests": ["Tests de débit automatiques", "Automatische snelheidstests", "Automatische Geschwindigkeitstests", "Pruebas de velocidad automáticas", "Mga awtomatikong pagsubok ng bilis", "Automatiska hastighetstester", "Test automatici di velocità", "Automatyczne testy prędkości", "Automatiske hastighedstest", "Automatiske hastighetstester"],
+    "Interval in minutes": ["Intervalle en minutes", "Interval in minuten", "Intervall in Minuten", "Intervalo en minutos", "Agwat sa minuto", "Intervall i minuter", "Intervallo in minuti", "Odstęp w minutach", "Interval i minutter", "Intervall i minutter"],
+    "Save interval": ["Enregistrer l’intervalle", "Interval opslaan", "Intervall speichern", "Guardar intervalo", "I-save ang agwat", "Spara intervall", "Salva intervallo", "Zapisz odstęp", "Gem interval", "Lagre intervall"],
+    "Enter 0 for manual tests only.": ["Saisissez 0 pour les tests manuels uniquement.", "Vul 0 in voor alleen handmatige tests.", "0 für ausschließlich manuelle Tests eingeben.", "Introduce 0 para usar solo pruebas manuales.", "Ilagay ang 0 para sa manu-manong pagsubok lamang.", "Ange 0 för enbart manuella tester.", "Inserisci 0 per i soli test manuali.", "Wpisz 0, aby testować tylko ręcznie.", "Angiv 0 for kun manuelle test.", "Angi 0 for kun manuelle tester."],
+    "Automation examples ↗": ["Exemples d’automatisations ↗", "Automatiseringsvoorbeelden ↗", "Automatisierungsbeispiele ↗", "Ejemplos de automatización ↗", "Mga halimbawa ng automation ↗", "Automationsexempel ↗", "Esempi di automazioni ↗", "Przykłady automatyzacji ↗", "Automatiseringseksempler ↗", "Automasjonseksempler ↗"],
+    "Now": ["Maintenant", "Nu", "Jetzt", "Ahora", "Ngayon", "Nu", "Ora", "Teraz", "Nu", "Nå"],
+    "24h ago": ["Il y a 24 h", "24 uur geleden", "Vor 24 Std.", "Hace 24 h", "24 oras ang nakalipas", "För 24 h sedan", "24 ore fa", "24 godz. temu", "For 24 t siden", "For 24 t siden"],
+    "12h ago": ["Il y a 12 h", "12 uur geleden", "Vor 12 Std.", "Hace 12 h", "12 oras ang nakalipas", "För 12 h sedan", "12 ore fa", "12 godz. temu", "For 12 t siden", "For 12 t siden"],
+    "No reading": ["Aucune mesure", "Geen meting", "Kein Messwert", "Sin lectura", "Walang sukat", "Inget mätvärde", "Nessuna lettura", "Brak odczytu", "Ingen måling", "Ingen måling"],
+    "Entity not configured": ["Entité non configurée", "Entiteit niet ingesteld", "Entität nicht eingerichtet", "Entidad sin configurar", "Hindi nakatakda ang entity", "Entitet ej konfigurerad", "Entità non configurata", "Encja nieskonfigurowana", "Entitet ikke konfigureret", "Entitet ikke konfigurert"],
+    "No history yet": ["Aucun historique", "Nog geen geschiedenis", "Noch kein Verlauf", "Sin historial aún", "Wala pang kasaysayan", "Ingen historik ännu", "Nessuna cronologia", "Brak historii", "Ingen historik endnu", "Ingen historikk ennå"],
+    "Save": ["Enregistrer", "Opslaan", "Speichern", "Guardar", "I-save", "Spara", "Salva", "Zapisz", "Gem", "Lagre"],
+    "Cancel": ["Annuler", "Annuleren", "Abbrechen", "Cancelar", "Kanselahin", "Avbryt", "Annulla", "Anuluj", "Annuller", "Avbryt"],
+    "Restore defaults": ["Rétablir les valeurs par défaut", "Standaardwaarden herstellen", "Standard wiederherstellen", "Restablecer valores", "Ibalik ang mga default", "Återställ standardvärden", "Ripristina predefiniti", "Przywróć domyślne", "Gendan standarder", "Gjenopprett standardvalg"],
+    "Track all": ["Tout suivre", "Alles volgen", "Alle verfolgen", "Seguir todos", "Subaybayan lahat", "Spåra alla", "Monitora tutti", "Śledź wszystkie", "Spor alle", "Spor alle"],
+    "Track": ["Suivre", "Volgen", "Verfolgen", "Seguir", "Subaybayan", "Spåra", "Monitora", "Śledź", "Spor", "Spor"],
+    "DNS & ad blocking": ["DNS et blocage publicitaire", "DNS en advertentieblokkering", "DNS und Werbeblocker", "DNS y bloqueo de anuncios", "DNS at pagharang ng ad", "DNS och annonsblockering", "DNS e blocco annunci", "DNS i blokowanie reklam", "DNS og annonceblokering", "DNS og annonseblokkering"],
+    "Remote access & SSL": ["Accès distant et SSL", "Externe toegang en SSL", "Fernzugriff und SSL", "Acceso remoto y SSL", "Malayuang access at SSL", "Fjärråtkomst och SSL", "Accesso remoto e SSL", "Dostęp zdalny i SSL", "Fjernadgang og SSL", "Fjerntilgang og SSL"],
+  };
   const themeKey = "network-control.theme";
   const speedDefaults = [
     "sensor.speedtest_download",
@@ -196,8 +285,11 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
+      this.language = "en";
       this.theme = "network";
       try {
+        const language = localStorage.getItem("network-control.language");
+        if (Object.hasOwn(languages, language)) this.language = language;
         const saved = localStorage.getItem(themeKey);
         if (Object.hasOwn(themes, saved)) this.theme = saved;
       } catch { /* Keep the default when browser storage is disabled. */ }
@@ -344,7 +436,7 @@
         : "—";
     }
     build() {
-      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><span class="trek-ops">Primary Ops</span><button type="button" class="theme-button">Settings</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2><button type="button" class="manage-panel" data-manage-panel="personal" aria-label="Manage personal devices">Manage</button></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || "Local network")}</span></div><div class="scanstats">${[
+      this.shadowRoot.innerHTML = `<link rel="stylesheet" href="${stylesheet}"><div class="shell"><div class="wrap"><header><h1 id="dashboard-title">Network Control</h1><div class="head-right"><span class="trek-ops">Primary Ops</span><button type="button" class="theme-button">Settings</button><div class="topline"><span id="router"></span><span class="ip" id="ip"></span></div></div></header><div class="grid"><div class="metrics" id="speed-metrics">${["Download", "Upload", "Latency"].map((n, i) => `<button class="metric" data-entity="${esc(this.speed[i])}"><div class="label">${n}<span style="color:${colors[i]}">${["↓", "↑", "↔"][i]}</span></div><div class="value" style="color:${colors[i]}"><span id="v${i}">—</span><span class="unit">${i === 2 ? "ms" : "Mbps"}</span></div><div class="sub" id="s${i}"></div></button>`).join("")}</div><div class="main" id="main"><section class="panel hist" id="history"><div class="heading"><h2>Connection history</h2><span class="tag">LAST 24 HOURS</span></div><div class="chart"><div class="legend">${["Download", "Upload", "Latency"].map((n, i) => `<span><i style="background:${colors[i]}"></i>${n}</span>`).join("")}</div><div class="plotwrap"><div class="plot" id="plot"><div class="empty">Loading history…</div></div><span class="yl tl" id="yl0"></span><span class="yl bl" id="yl1"></span><span class="yl tr" id="yl2"></span><span class="yl br" id="yl3"></span></div><div class="axis"><span>24h ago</span><span>12h ago</span><span>Now</span></div><div class="chartnote" id="chartnote">Recorded speed tests · Mbps left / ms right</div></div></section><div class="side" id="side"><section class="panel" id="personal-panel"><div class="heading"><h2>Personal devices</h2><button type="button" class="manage-panel" data-manage-panel="personal" aria-label="Manage personal devices">Manage</button></div><div id="personal" class="readings"></div></section><section class="panel" id="printers" hidden><div class="heading"><h2>Printer supplies</h2></div><div id="supplies" class="readings"></div></section></div></div><section class="panel scan" id="scanner" hidden><div class="heading"><h2>Network scanner</h2><span class="tag" id="scantag">${esc(this.config.scan_subnet || this.t("Local network"))}</span></div><div class="scanstats">${[
         ["online", "Online", "ok"],
         ["offline", "Dropped off", "warn"],
         ["unnamed", "Unnamed", ""],
@@ -385,6 +477,31 @@
           this._hass.entities?.[id]?.platform === platform && pattern.test(id),
       );
     }
+    t(key) {
+      return translations[key]?.[Object.keys(languages).indexOf(this.language) - 1] ?? key;
+    }
+    // Bind only template text, before any user-provided device names are inserted.
+    bindLabels(root) {
+      const labels = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const source = node.data;
+        const key = source.trim();
+        if (Object.hasOwn(translations, key))
+          labels.push(() => { node.data = source.replace(key, this.t(key)); });
+      }
+      for (const el of root.querySelectorAll("[placeholder],[aria-label]")) {
+        for (const attr of ["placeholder", "aria-label"]) {
+          const key = el.getAttribute(attr);
+          if (Object.hasOwn(translations, key))
+            labels.push(() => el.setAttribute(attr, this.t(key)));
+        }
+      }
+      const apply = () => labels.forEach(bind => bind());
+      apply();
+      return apply;
+    }
     setupSettings() {
       const shell = this.root.querySelector(".shell");
       const trigger = shell.querySelector(".theme-button");
@@ -392,9 +509,27 @@
       dialog.className = "theme-dialog";
       dialog.setAttribute("aria-label", "Network Control settings");
       dialog.innerHTML = `<form method="dialog"><div class="theme-heading"><strong>Settings</strong><button type="submit" autofocus>Close</button></div></form>
-        <h3>Theme</h3><div class="theme-choices">${Object.entries(themes).map(([id, [name, background, accent]]) =>
+        <label class="language-setting">Language <select></select></label><h3>Theme</h3><div class="theme-choices">${Object.entries(themes).map(([id, [name, background, accent]]) =>
           `<button type="button" data-theme-choice="${id}"><span aria-hidden="true" style="--swatch-bg:${background};--swatch-accent:${accent}"></span>${name}</button>`).join("")}</div><form class="speed-settings" hidden><h3>Automatic speed tests</h3><label>Interval in minutes <input type="number" min="0" max="10080" step="1" required disabled></label><button type="submit" disabled>Save interval</button><small>Enter 0 for manual tests only.</small><div role="status"></div></form><a class="automation-examples" href="https://github.com/yanke7/Home-Assistant-Network/blob/main/docs/automations.md" target="_blank" rel="noopener noreferrer">Automation examples ↗</a>`;
       shell.append(dialog);
+      const refreshLabels = this.bindLabels(shell);
+      const language = dialog.querySelector(".language-setting select");
+      for (const [code, name] of Object.entries(languages)) language.add(new Option(name, code));
+      const applyLanguage = () => {
+        language.value = this.language;
+        shell.lang = this.language;
+        shell.querySelector("#host-panel h2").dataset.telemetry = " & " + this.t("Telemetry");
+        refreshLabels();
+      };
+      applyLanguage();
+      language.addEventListener("change", () => {
+        this.language = language.value;
+        try { localStorage.setItem("network-control.language", this.language); } catch { /* Session only. */ }
+        applyLanguage();
+        this.historyVisibilityKey = null;
+        this.update();
+        this.renderScan(true);
+      });
       this.setupSpeedInterval(dialog);
       const apply = () => {
         shell.removeAttribute("style");
@@ -434,7 +569,7 @@
         if (form.hidden) return;
         const request = ++opening;
         input.disabled = save.disabled = true;
-        status.textContent = "Loading interval…";
+        status.textContent = this.t("Loading interval…");
         try {
           const entries = await this._hass.callWS({ type: "config_entries/get", domain: "network_control" });
           const entry = entries.find((item) => item.state === "loaded" && item.supports_options);
@@ -451,7 +586,7 @@
           input.disabled = save.disabled = false;
           status.textContent = "";
         } catch {
-          if (request === opening) status.textContent = "Speed test schedule unavailable.";
+          if (request === opening) status.textContent = this.t("Speed test schedule unavailable.");
         }
       });
       form.addEventListener("submit", async (event) => {
@@ -461,16 +596,16 @@
         const id = flow;
         flow = null;
         input.disabled = save.disabled = true;
-        status.textContent = "Saving…";
+        status.textContent = this.t("Saving…");
         try {
           const result = await this._hass.callApi("POST", `${endpoint}/${id}`, {
             speed_test_interval: input.valueAsNumber,
           });
           if (result.type !== "create_entry") throw Error("Save incomplete");
-          if (request === opening) status.textContent = "Interval saved.";
+          if (request === opening) status.textContent = this.t("Interval saved.");
         } catch {
           discard(id);
-          if (request === opening) status.textContent = "Could not save. Reopen Settings to try again.";
+          if (request === opening) status.textContent = this.t("Could not save. Reopen Settings to try again.");
         }
       });
     }
@@ -503,7 +638,7 @@
       const percent = Number(entity?.state);
       const meter = unit === "%" && available(entity) && Number.isFinite(percent)
         ? `<i class="usage-meter" aria-hidden="true" style="--fill:${Math.min(100, Math.max(0, percent))}%"></i>` : "";
-      const content = `<span>${esc(label || entity?.attributes.friendly_name || id)}</span><span>${meter}${esc(value)}</span>`;
+      const content = `<span>${esc(this.t(label) || entity?.attributes.friendly_name || id)}</span><span>${meter}${esc(available(entity) ? value : this.t(value))}</span>`;
       return entity
         ? `<button class="reading" data-entity="${esc(id)}">${content}</button>`
         : `<div class="reading">${content}</div>`;
@@ -511,7 +646,7 @@
     rows(element, rows) {
       const html =
         rows.map(([label, id]) => this.reading(label, id)).join("") ||
-        `<div class="hint">${missing}</div>`;
+        `<div class="hint">${this.t(missing)}</div>`;
       this.renderMarkup(element, html);
     }
     renderMarkup(id, html) {
@@ -590,11 +725,11 @@
           id,
           index === 2 ? 0 : 1,
         );
-        this.root.getElementById("s" + index).textContent = !this.state(id)
+        this.root.getElementById("s" + index).textContent = this.t(!this.state(id)
           ? missing
           : this.value(id) === "—"
             ? "No reading"
-            : "Last speed test";
+            : "Last speed test");
       });
 
       this.defaultPersonal =
@@ -742,7 +877,7 @@
         const value = sample.duration
           ? `${Math.floor(sample.value * 60)} min uptime`
           : sample.raw + (unit === "%" ? "%" : unit ? " " + unit : "");
-        tooltip.textContent = `${label} · ${value} · ${new Date(sample.time).toLocaleString()}`;
+        tooltip.textContent = `${label} · ${value} · ${new Date(sample.time).toLocaleString(this.language)}`;
         tooltip.hidden = false;
         tooltip.style.left = Math.max(8, Math.min(event.clientX + 12, window.innerWidth - tooltip.offsetWidth - 8)) + "px";
         tooltip.style.top = Math.max(8, rect.top - tooltip.offsetHeight - 5) + "px";
@@ -780,9 +915,9 @@
         const fill = Number.isFinite(fraction) ? Math.max(0, Math.min(1, fraction)) : 0;
         const graph = this.hostHistory.series[id] || "";
         return `<button type="button" class="host-instrument instrument-${index}" ${state ? `data-entity="${esc(id)}"` : "disabled"}>
-          <span class="instrument-label">${esc(label)}</span>
+          <span class="instrument-label">${esc(this.t(label))}</span>
           <span class="instrument-display"><i class="instrument-arc" aria-hidden="true" style="--level:${fill}"></i><strong>${esc(value)}</strong></span>
-          <span class="instrument-plot">${graph || `<span class="instrument-empty">${state ? "No history yet" : "Entity not configured"}</span>`}</span>
+          <span class="instrument-plot">${graph || `<span class="instrument-empty">${this.t(state ? "No history yet" : "Entity not configured")}</span>`}</span>
         </button>`;
       }).join("");
       this.renderMarkup("host", markup);
@@ -923,11 +1058,12 @@
         dialog.className = "theme-dialog snapshot-dialog";
         dialog.setAttribute("aria-label", "Connection snapshot");
         dialog.innerHTML = '<div class="theme-heading"><strong>Connection snapshot</strong><form method="dialog"><button autofocus>Close</button></form></div><textarea readonly aria-label="Connection summary"></textarea><button type="button" class="select-summary">Select summary</button>';
+        this.bindLabels(dialog);
         const summary = dialog.querySelector("textarea");
         const labels = ["Download", "Upload", "Latency"];
         summary.value = [new Date().toLocaleString(), ...this.speed.map((id, index) => {
           const value = this.value(id, index === 2 ? 0 : 1);
-          return `${labels[index]}: ${value === "—" ? "No reading" : value + (index === 2 ? " ms" : " Mbps")}`;
+          return `${this.t(labels[index])}: ${value === "—" ? "No reading" : value + (index === 2 ? " ms" : " Mbps")}`;
         })].join("\n");
         dialog.querySelector(".select-summary").onclick = () => { summary.focus(); summary.select(); };
         const trigger = this.root.querySelector('[data-network-shortcut="snapshot"]');
@@ -991,8 +1127,8 @@
       const selected = new Set(this.panelPreferences[panel] ?? defaultSelection);
       const choices = new Map();
       if (!personal) {
-        for (const [id, label] of shortcuts) choices.set("shortcut:" + id, label);
-        for (const action of actions) choices.set(this.controlKey(action), action.label);
+        for (const [id, label] of shortcuts) choices.set("shortcut:" + id, this.t(label));
+        for (const action of actions) choices.set(this.controlKey(action), this.t(action.label));
       }
       const domains = personal ? /^(person|device_tracker|sensor|binary_sensor|switch|light|input_boolean|input_number|input_select|input_text|weather|media_player)\./ : /^(button|script|switch)\./;
       for (const [id, state] of Object.entries(this._hass.states)) {
@@ -1009,6 +1145,7 @@
         <input type="search" autofocus aria-label="Find an entity or control" placeholder="Search names or entity IDs">
         <div class="manage-choices"></div>
         <div role="status" class="manage-status"></div><div class="manage-footer"><button type="button" data-reset>Restore defaults</button><button type="button" data-cancel>Cancel</button><button type="button" data-save>Save</button></div>`;
+      this.bindLabels(dialog);
       const search = dialog.querySelector("input");
       const list = dialog.querySelector(".manage-choices");
       const sorted = [...choices].sort(([a, aLabel], [b, bLabel]) =>
@@ -1061,12 +1198,12 @@
       }
       this.visibleShortcuts = this.shortcuts().filter(([id]) => !selected || selected.includes("shortcut:" + id));
       const shortcuts = this.visibleShortcuts.map(([id, label, icon]) =>
-        `<button type="button" data-network-shortcut="${id}"><ha-icon icon="${icon}" aria-hidden="true"></ha-icon>${label}</button>`).join("");
+        `<button type="button" data-network-shortcut="${id}"><ha-icon icon="${icon}" aria-hidden="true"></ha-icon>${esc(this.t(label))}</button>`).join("");
       const serviceButtons =
         this.availableActions
           .map((action, index) => {
             const active = this.activeAction === action.label;
-            return `<button data-action="${index}" ${this.activeAction ? "disabled" : ""}>${active ? '<span class="spinner" aria-hidden="true"></span>' : ""}${esc(active ? action.label + "…" : action.label)}</button>`;
+            return `<button data-action="${index}" ${this.activeAction ? "disabled" : ""}>${active ? '<span class="spinner" aria-hidden="true"></span>' : ""}${esc(this.t(action.label) + (active ? "…" : ""))}</button>`;
           })
           .join("");
       this.renderMarkup("actions", shortcuts + serviceButtons || '<div class="hint">No network controls configured</div>');
@@ -1076,7 +1213,7 @@
       if (
         !action ||
         this.activeAction ||
-        (action.confirm && !window.confirm(action.label + "?"))
+        (action.confirm && !window.confirm(this.t(action.label) + "?"))
       )
         return;
       this.activeAction = action.label;
@@ -1183,16 +1320,14 @@
           (v, i) => (this.root.getElementById("yl" + i).textContent = v),
         );
         this.root.getElementById("chartnote").textContent =
-          "Recorded speed tests · Mbps left / ms right · Latency above " +
-          this.latencyCap +
-          " ms omitted";
+          this.t("Recorded speed tests · Mbps left / ms right · Latency above {cap} ms omitted").replace("{cap}", this.latencyCap);
       } catch (e) {
         if (this.historyRequest !== request) return;
         axis.forEach((label) => {
           label.textContent = "";
         });
         this.root.getElementById("plot").innerHTML =
-          '<div class="empty">History unavailable</div>';
+          '<div class="empty">' + this.t("History unavailable") + '</div>';
         this.root.getElementById("chartnote").textContent =
           "Latest readings remain above. History retries every 5 minutes.";
       } finally {
@@ -1322,7 +1457,7 @@
       const d = new Date(t),
         today = new Date().toDateString() === d.toDateString();
       return d.toLocaleString(
-        undefined,
+        this.language,
         today
           ? { hour: "numeric", minute: "2-digit" }
           : {
@@ -1382,14 +1517,14 @@
           b.classList.toggle("on", b.dataset.tab === this.scan.tab),
         );
       this.root.getElementById("pending").innerHTML = pend.length
-        ? `<div class="pending"><span><b>${pend.length}</b> new device${pend.length > 1 ? "s" : ""} found, not tracked yet</span><button data-track="all">Track all</button></div>`
+        ? `<div class="pending"><span><b>${pend.length}</b> ${this.language === "en" ? "new device" + (pend.length > 1 ? "s" : "") + " found, not tracked yet" : this.t("New devices awaiting tracking")}</span><button data-track="all">${this.t("Track all")}</button></div>`
         : "";
       const latest = Math.max(0, ...tracked.map((d) => d.seen));
       this.root.getElementById("scanfoot").textContent = model.length
-        ? `${tracked.length} tracked · last sweep ${latest ? this.clock(latest) : "pending"}`
+        ? `${tracked.length} ${this.language === "en" ? "tracked" : this.t("Tracked devices")} · ${this.t("Last sweep")} ${latest ? this.clock(latest) : "pending"}`
         : "";
       this.root.getElementById("scantag").textContent =
-        (this.config.scan_subnet || "Local network") + " · LIVE";
+        (this.config.scan_subnet || this.t("Local network")) + " · LIVE";
       if (this.scan.tab === "activity") {
         list.innerHTML = this.activityMarkup(tracked);
         return;
@@ -1411,7 +1546,7 @@
           0,
       );
       if (this.scan.tab === "new" && !pend.length && this.regOk !== false) {
-        list.innerHTML = '<div class="none">No new devices awaiting tracking.</div>';
+        list.innerHTML = `<div class="none">${this.t("No new devices awaiting tracking.")}</div>`;
         return;
       }
       if (!model.length) {
@@ -1424,9 +1559,9 @@
               const cls = d.status === "pending" ? "pendingrow" : d.status;
               const when =
                 d.status === "online"
-                  ? `Online ${this.ago(d.changed)}`
+                  ? `${this.t("Online")} ${this.ago(d.changed)}`
                   : d.status === "offline"
-                    ? `Dropped ${this.ago(d.changed)} ago`
+                    ? `${this.t("Dropped")} · ${this.clock(d.changed)}`
                     : d.status === "pending"
                       ? "Not tracked"
                       : d.status === "disabled"
@@ -1435,10 +1570,10 @@
               const sub = `${esc(d.vendor)}${this.config.show_mac ? " · " + esc(d.mac.toUpperCase()) : ""}${d.status === "offline" && d.seen ? " · last seen " + esc(this.clock(d.seen)) : ""}`;
               if (this.scan.editing === d.id)
                 return `<div class="row ${cls}"><span class="sd"></span><input class="rename" data-id="${esc(d.id)}" value="${esc(d.custom || d.suggested ? d.name : "")}" placeholder="Name this device (${esc(d.ip || d.vendor)})" maxlength="60" aria-label="Device name"><button class="rowbtn" data-save="${esc(d.id)}">Save</button><button class="rowbtn" data-cancel="1">Cancel</button></div>`;
-              return `<div class="row ${cls}"><span class="sd" title="${esc(d.status)}"></span><button class="who" ${["pending", "disabled"].includes(d.status) ? "" : `data-entity="${esc(d.id)}"`}><span class="nm">${esc(d.name)}${d.custom ? "" : d.suggested ? "<em>suggested</em>" : "<em>unnamed</em>"}</span><span class="sub2">${sub}</span></button><div class="addr">${esc(d.ip || "—")}<small>${esc(when)}</small></div>${d.status === "disabled" ? "" : d.status === "pending" ? `<button class="rowbtn" data-track="${esc(d.id)}">Track</button>` : `<button class="edit" data-edit="${esc(d.id)}" title="Assign a name" aria-label="Assign a name to ${esc(d.name)}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button>`}</div>`;
+              return `<div class="row ${cls}"><span class="sd" title="${esc(d.status)}"></span><button class="who" ${["pending", "disabled"].includes(d.status) ? "" : `data-entity="${esc(d.id)}"`}><span class="nm">${esc(d.name)}${d.custom ? "" : d.suggested ? "<em>" + this.t("suggested") + "</em>" : "<em>" + this.t("Unnamed").toLocaleLowerCase(this.language) + "</em>"}</span><span class="sub2">${sub}</span></button><div class="addr">${esc(d.ip || "—")}<small>${esc(this.t(when))}</small></div>${d.status === "disabled" ? "" : d.status === "pending" ? `<button class="rowbtn" data-track="${esc(d.id)}">${this.t("Track")}</button>` : `<button class="edit" data-edit="${esc(d.id)}" title="Assign a name" aria-label="Assign a name to ${esc(d.name)}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button>`}</div>`;
             })
             .join("")
-        : `<div class="none">No devices match this filter.</div>`;
+        : `<div class="none">${this.t("No devices match this filter.")}</div>`;
       if (this.scan.editing) {
         const inp = list.querySelector(".rename");
         if (inp && this.root.activeElement !== inp) {
@@ -1552,7 +1687,7 @@
       const rows = this.scan.events
         .map(
           (e) =>
-            `<div class="ev ${e.type}"><i>${e.type === "drop" ? "Dropped" : "Joined"}</i><b>${esc(names.get(e.id))}</b><span class="t">${esc(this.clock(e.t))} · ${esc(this.ago(e.t))} ago</span></div>`,
+            `<div class="ev ${e.type}"><i>${this.t(e.type === "drop" ? "Dropped" : "Joined")}</i><b>${esc(names.get(e.id))}</b><span class="t">${esc(this.clock(e.t))} · ${esc(this.ago(e.t))} ago</span></div>`,
         )
         .join("");
       if (this.activityFailed || this.regOk === false) {
@@ -1567,7 +1702,7 @@
         return '<div class="none">Loading activity history…</div>';
       return (
         rows ||
-        '<div class="none">No devices joined or dropped off in the last 24 hours.</div>'
+        '<div class="none">' + this.t("No devices joined or dropped off in the last 24 hours.") + '</div>'
       );
     }
     async loadActivity() {

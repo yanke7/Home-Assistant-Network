@@ -53,6 +53,8 @@ The guide has ready-to-copy YAML for all four examples. You can also open it fro
 
 For manual installation, copy `custom_components/network_control` to the same path under your Home Assistant configuration directory, then follow steps 2–3.
 
+**Dashboard language** — Open Network Control **Settings → Language** to choose English, French, Dutch, German, Spanish, Tagalog, Swedish, Italian, Polish, Danish, or Norwegian Bokmål. The selection takes effect immediately and is saved in the current browser.
+
 ## Customize in Home Assistant
 
 Open the dashboard, choose **Edit dashboard**, then edit the **Network Control** card. Use the visual editor to choose entities from your Home Assistant instance, change the heading, and choose when each optional section appears. Save the dashboard when you’re done.

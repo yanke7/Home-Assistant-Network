@@ -1699,7 +1699,7 @@ summary {
   background-image:linear-gradient(#91633866 1px,transparent 1px),linear-gradient(90deg,#91633866 1px,transparent 1px);
   background-size:100% 25%,8.333% 100%;
 }
-.shell[data-theme="trek"] #host-panel .heading h2::after {content:" & Telemetry"}
+.shell[data-theme="trek"] #host-panel .heading h2::after {content:attr(data-telemetry)}
 .shell[data-theme="trek"] .scan {border-top:0}
 .shell[data-theme="trek"] .stat {
   --lamp:#8cda98;
@@ -1831,3 +1831,4 @@ summary {
     border-radius:0 8px 8px 0;
   }
 }
+.language-setting {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-block:12px}.language-setting select {font:inherit;max-width:65%;padding:5px}
