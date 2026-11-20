@@ -4,6 +4,12 @@
 
 Network Control is a Home Assistant network monitoring dashboard for checking internet speed, finding devices on your LAN, and keeping an eye on your Home Assistant host. It puts download, upload, ping, device activity, and host health history on one screen.
 
+## Watch the 30-second overview
+
+[![Network Control video preview showing the Home Assistant dashboard](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/network-control-video.webp)](https://github.com/yanke7/Home-Assistant-Network/releases/download/v1.20.2/network-explainer.mp4)
+
+[Watch or download the MP4](https://github.com/yanke7/Home-Assistant-Network/releases/download/v1.20.2/network-explainer.mp4) to see the dashboard, supported integrations, example automations, and language settings.
+
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
 
 ## Dashboard screenshots
