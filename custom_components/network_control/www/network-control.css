@@ -1730,3 +1730,54 @@ summary {
   .shell[data-theme="trek"] .metric :is(.label,.value,.sub) {padding-inline-start:14%}
   .shell[data-theme="trek"] .metric .value {font-size:clamp(27px,3.4vw,62px)}
 }
+
+@media (max-width:650px) {
+  .shell[data-theme="trek"] header {
+    --mobile-badge:clamp(62px,21vw,94px);
+    position:relative;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"title settings" "ops address";
+    align-content:center;
+    align-items:center;
+    gap:3px 6px;
+    min-height:var(--mobile-badge);
+    padding:0 0 0 calc(var(--mobile-badge) + 8px);
+    margin-bottom:8px;
+  }
+  .shell[data-theme="trek"] #dashboard-title {
+    grid-area:title;
+    margin:0;
+    font-size:clamp(17px,5.2vw,26px);
+    line-height:1;
+  }
+  .shell[data-theme="trek"] #dashboard-title::before {
+    position:absolute;
+    inset:50% auto auto 0;
+    transform:translateY(-50%);
+    width:var(--mobile-badge);
+    height:var(--mobile-badge);
+    margin:0;
+  }
+  .shell[data-theme="trek"] .head-right {display:contents}
+  .shell[data-theme="trek"] .trek-ops {grid-area:ops;align-self:start;font-size:clamp(15px,4vw,20px)}
+  .shell[data-theme="trek"] .theme-button {grid-area:settings;justify-self:end}
+  .shell[data-theme="trek"] .head-right .topline {
+    grid-area:address;
+    display:grid;
+    justify-items:end;
+    gap:2px;
+    margin:0;
+    max-width:clamp(95px,27vw,145px);
+    text-align:right;
+    overflow-wrap:anywhere;
+  }
+  .shell[data-theme="trek"] .metrics {gap:6px}
+  .shell[data-theme="trek"] .metric .value {font-size:clamp(21px,6.8vw,32px)}
+  .shell[data-theme="trek"] .metric .unit {margin-left:3px;font-size:10px}
+  .shell[data-theme="trek"] #personal {grid-template-columns:minmax(0,1fr);padding:10px 12px 12px;gap:5px}
+  .shell[data-theme="trek"] #personal .reading {min-height:32px}
+}
+@media (max-width:650px) {
+  .shell[data-theme="trek"] .metric {min-height:76px;grid-template-rows:23px minmax(30px,1fr) auto}
+}
