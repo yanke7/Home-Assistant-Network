@@ -1794,19 +1794,19 @@ summary {
     /* Align with the capitals of the condensed display face. */
     transform:translateY(-.15em);
   }
-  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading {
+  .shell[data-theme="trek"] :is(.hist,#host-panel,.scan) .heading {
     --rail-height:clamp(16px,1.55vw,24px);
     gap:6px;
   }
-  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading::before {
+  .shell[data-theme="trek"] :is(.hist,#host-panel,.scan) .heading::before {
     content:"";
     order:1;
     flex:1;
     height:var(--rail-height);
     background:var(--rail,var(--yanke-accent));
   }
-  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading .tag {order:2;white-space:nowrap}
-  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading::after {
+  .shell[data-theme="trek"] :is(.hist,#host-panel,.scan) .heading .tag {order:2;white-space:nowrap}
+  .shell[data-theme="trek"] :is(.hist,#host-panel,.scan) .heading::after {
     order:3;
     flex:0 0 clamp(18px,2vw,32px);
     height:var(--rail-height);
