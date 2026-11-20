@@ -1781,3 +1781,43 @@ summary {
 @media (max-width:650px) {
   .shell[data-theme="trek"] .metric {min-height:76px;grid-template-rows:23px minmax(30px,1fr) auto}
 }
+
+@media (min-width:1000px) {
+  .shell[data-theme="trek"] header {
+    align-items:center;
+    column-gap:clamp(6px,.7vw,14px);
+  }
+  .shell[data-theme="trek"] #dashboard-title,
+  .shell[data-theme="trek"] .trek-ops {margin-block:0;line-height:1}
+  .shell[data-theme="trek"] header::after {
+    align-self:center;
+    /* Align with the capitals of the condensed display face. */
+    transform:translateY(-.15em);
+  }
+  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading {
+    --rail-height:clamp(16px,1.55vw,24px);
+    gap:6px;
+  }
+  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading::before {
+    content:"";
+    order:1;
+    flex:1;
+    height:var(--rail-height);
+    background:var(--rail,var(--yanke-accent));
+  }
+  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading .tag {order:2;white-space:nowrap}
+  .shell[data-theme="trek"] :is(.hist,#host-panel) .heading::after {
+    order:3;
+    flex:0 0 clamp(18px,2vw,32px);
+    height:var(--rail-height);
+    background:var(--rail,var(--yanke-accent));
+    border-radius:0 99px 99px 0;
+  }
+  .shell[data-theme="trek"] .hist {
+    border-bottom:clamp(6px,.6vw,10px) solid transparent;
+    border-radius:38px 12px 14px 3px;
+    background:linear-gradient(#000,#000) padding-box,
+      linear-gradient(90deg,#ac80ab 0 49%,#000 49% 50%,#9994d7 50% 95%,#000 95% 96%,#f2c457 96%) bottom / 100% clamp(6px,.6vw,10px) no-repeat border-box,
+      linear-gradient(to bottom,#e98d45 60%,#000 60% 63%,#ac80ab 63%) border-box;
+  }
+}

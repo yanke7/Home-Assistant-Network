@@ -13,7 +13,7 @@ DOMAIN = "network_control"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 PLATFORMS = [Platform.SENSOR, Platform.BUTTON, Platform.EVENT]
 CARD_PATH = "/network_control/network-control.js"
-CARD_URL = f"{CARD_PATH}?v=1.19.1"
+CARD_URL = f"{CARD_PATH}?v=1.19.2"
 
 
 async def async_setup(hass, config):
