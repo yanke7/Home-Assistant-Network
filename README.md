@@ -53,7 +53,7 @@ The guide has ready-to-copy YAML for all four examples. You can also open it fro
 
 For manual installation, copy `custom_components/network_control` to the same path under your Home Assistant configuration directory, then follow steps 2–3.
 
-**Dashboard language** — Open Network Control **Settings → Language** to choose English, French, Dutch, German, Spanish, Tagalog, Swedish, Italian, Polish, Danish, or Norwegian Bokmål. The selection takes effect immediately and is saved in the current browser.
+**Dashboard language** — The default, **Use Home Assistant language**, follows your profile for the dashboard and visual editor. Regional variants use their base language (for example, French Canadian uses French). Unsupported languages fall back to English. Open **Settings → Language** to manually choose English, French, Dutch, German, Spanish, Tagalog, Swedish, Italian, Polish, Danish, or Norwegian Bokmål. The selection takes effect immediately and is saved in the current browser.
 
 ## Customize in Home Assistant
 

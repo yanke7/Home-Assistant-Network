@@ -26,6 +26,7 @@
   const languages = {"en": "English", "fr": "Français", "nl": "Nederlands", "de": "Deutsch", "es": "Español", "tl": "Tagalog", "sv": "Svenska", "it": "Italiano", "pl": "Polski", "da": "Dansk", "nb": "Norsk bokmål"};
   // Translation columns follow the language selector order, excluding English.
   const translations = {
+    "Use Home Assistant language": ["Utiliser la langue de Home Assistant", "Taal van Home Assistant gebruiken", "Sprache von Home Assistant verwenden", "Usar el idioma de Home Assistant", "Gamitin ang wika ng Home Assistant", "Använd språket i Home Assistant", "Usa la lingua di Home Assistant", "Użyj języka Home Assistant", "Brug sproget i Home Assistant", "Bruk språket i Home Assistant"],
     "Action failed. Check the entity and your permissions.": ["L'action a échoué. Vérifiez l'entité et vos autorisations.", "Actie mislukt. Controleer de entiteit en uw machtigingen.", "Aktion fehlgeschlagen. Überprüfen Sie die Entität und Ihre Berechtigungen.", "La acción falló. Verifique la entidad y sus permisos.", "Nabigo ang pagkilos. Suriin ang entity at ang iyong mga pahintulot.", "Åtgärden misslyckades. Kontrollera enheten och dina behörigheter.", "Azione fallita. Controlla l'entità e le tue autorizzazioni.", "Akcja nie powiodła się. Sprawdź podmiot i swoje uprawnienia.", "Handlingen mislykkedes. Tjek entiteten og dine tilladelser.", "Handlingen mislyktes. Sjekk enheten og tillatelsene dine."],
     "Action requested": ["Action demandée", "Actie gevraagd", "Aktion angefordert", "Acción solicitada", "Hiniling ang aksyon", "Åtgärd begärd", "Azione richiesta", "Zażądano działania", "Handling anmodet", "Handling forespurt"],
     "Activity history unavailable.": ["Historique d'activité indisponible.", "Activiteitengeschiedenis niet beschikbaar.", "Aktivitätsverlauf nicht verfügbar.", "Historial de actividad no disponible.", "Hindi available ang history ng aktibidad.", "Aktivitetshistoriken är inte tillgänglig.", "Cronologia attività non disponibile.", "Historia aktywności niedostępna.", "Aktivitetshistorikken er ikke tilgængelig.", "Aktivitetsloggen er utilgjengelig."],
@@ -373,12 +374,23 @@
       ]),
     ]),
   ];
+  let lastProfileLanguage;
   function savedLanguage() {
     try {
       const code = localStorage.getItem("network-control.language");
       if (Object.hasOwn(languages, code)) return code;
     } catch { /* Browser storage may be disabled. */ }
-    return "en";
+    return "auto";
+  }
+  function profileLanguage(hass) {
+    return hass?.locale?.language || hass?.language;
+  }
+  function resolveLanguage(choice, profile) {
+    if (choice !== "auto") return choice;
+    const base = profile?.toLowerCase().split(/[-_]/)[0];
+    if (base === "fil") return "tl";
+    if (base === "no") return "nb";
+    return Object.hasOwn(languages, base) ? base : "en";
   }
   function translate(key, language) {
     return translations[key]?.[Object.keys(languages).indexOf(language) - 1] ?? key;
@@ -399,7 +411,8 @@
     constructor() {
       super();
       this.attachShadow({ mode: "open" });
-      this.language = savedLanguage();
+      this.languageChoice = savedLanguage();
+      this.language = resolveLanguage(this.languageChoice, lastProfileLanguage);
       this.theme = "network";
       try {
         const saved = localStorage.getItem(themeKey);
@@ -491,7 +504,8 @@
     }
     static getConfigForm() {
       return {
-        schema: editorFields(form, savedLanguage()),
+        schema: editorFields(form, resolveLanguage(savedLanguage(),
+          profileLanguage(document.querySelector("home-assistant")?.hass) || lastProfileLanguage || document.documentElement.lang)),
         computeLabel: (field) => field.label,
         computeHelper: (field) => field.helper,
       };
@@ -508,6 +522,14 @@
     }
     set hass(hass) {
       this._hass = hass;
+      lastProfileLanguage = profileLanguage(hass) || document.documentElement.lang;
+      const nextLanguage = resolveLanguage(this.languageChoice, lastProfileLanguage);
+      const languageChanged = this.language !== nextLanguage;
+      this.language = nextLanguage;
+      if (languageChanged && this.root) {
+        this.applyLanguage();
+        this.historyVisibilityKey = null;
+      }
       this.selectSpeedSensors();
       if (!this.root) {
         this.build();
@@ -515,7 +537,7 @@
       }
       this.syncAppearance();
       this.update();
-      this.renderScan();
+      this.renderScan(languageChanged);
     }
     connectedCallback() {
       window.addEventListener("yanke-appearance-ready", this.syncAppearance);
@@ -626,20 +648,24 @@
       shell.append(dialog);
       const refreshLabels = this.bindLabels(shell);
       const language = dialog.querySelector(".language-setting select");
+      const automatic = new Option("", "auto");
+      language.add(automatic);
       for (const [code, name] of Object.entries(languages)) language.add(new Option(name, code));
-      const applyLanguage = () => {
+      this.applyLanguage = () => {
         const status = dialog.querySelector('.speed-settings [role="status"]');
         if (status.dataset.message) status.textContent = this.t(status.dataset.message);
-        language.value = this.language;
+        automatic.text = this.t("Use Home Assistant language");
+        language.value = this.languageChoice;
         shell.lang = this.language;
         shell.querySelector("#host-panel h2").dataset.telemetry = " & " + this.t("Telemetry");
         refreshLabels();
       };
-      applyLanguage();
+      this.applyLanguage();
       language.addEventListener("change", () => {
-        this.language = language.value;
-        try { localStorage.setItem("network-control.language", this.language); } catch { /* Session only. */ }
-        applyLanguage();
+        this.languageChoice = language.value;
+        this.language = resolveLanguage(this.languageChoice, profileLanguage(this._hass));
+        try { localStorage.setItem("network-control.language", this.languageChoice); } catch { /* Session only. */ }
+        this.applyLanguage();
         this.historyVisibilityKey = null;
         this.update();
         this.renderScan(true);
