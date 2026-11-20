@@ -16,27 +16,94 @@ https://github.com/user-attachments/assets/4cfd890a-ab76-42b4-b8be-fc31e116d012
 
 All screenshots use fictional devices and sample readings.
 
-### Desktop
-
-![Network Control desktop dashboard with live-style scanner, host gauges and controls](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network.webp)
-
-### Mobile
-
-![Network Control on a phone with the Settings and Manage buttons visible](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network-mobile.webp)
-
-![Star Trek theme on a phone](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek-mobile.webp)
-
-### More desktop themes
-
-![Star Trek theme on desktop](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek.webp)
-
-![Mac Control theme on desktop](https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac.webp)
+### Network Control
 
 <table>
-<tr><th>Brushed Steel</th><th>Amber Relay</th><th>Neon Grid</th></tr>
-<tr><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel.webp" alt="Brushed Steel desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay.webp" alt="Amber Relay desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon.webp" alt="Neon Grid desktop theme" width="300"></a></td></tr>
-<tr><th>Midnight Drift</th><th>Aqua Current</th><th>Follow Appearance</th></tr>
-<tr><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss.webp" alt="Midnight Drift desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide.webp" alt="Aqua Current desktop theme" width="300"></a></td><td><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance.webp" alt="Follow Appearance desktop theme" width="300"></a></td></tr>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network.webp" alt="Network Control dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/network-mobile.webp" alt="Network Control dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Brushed Steel
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel.webp" alt="Brushed Steel dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/steel-mobile.webp" alt="Brushed Steel dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Amber Relay
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay.webp" alt="Amber Relay dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/relay-mobile.webp" alt="Amber Relay dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Neon Grid
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon.webp" alt="Neon Grid dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/neon-mobile.webp" alt="Neon Grid dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Midnight Drift
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss.webp" alt="Midnight Drift dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/abyss-mobile.webp" alt="Midnight Drift dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Aqua Current
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide.webp" alt="Aqua Current dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/tide-mobile.webp" alt="Aqua Current dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Mac Control
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac.webp" alt="Mac Control dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/mac-mobile.webp" alt="Mac Control dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Star Trek
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek.webp" alt="Star Trek dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/trek-mobile.webp" alt="Star Trek dashboard on mobile" width="220"></a></td>
+</tr>
+</table>
+
+### Follow Appearance
+
+<table>
+<tr><th>Desktop</th><th>Mobile</th></tr>
+<tr>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance.webp" alt="Follow Appearance dashboard on desktop" width="620"></a></td>
+<td valign="top"><a href="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance-mobile.webp"><img src="https://raw.githubusercontent.com/yanke7/Home-Assistant-Network/main/docs/themes/appearance-mobile.webp" alt="Follow Appearance dashboard on mobile" width="220"></a></td>
+</tr>
 </table>
 
 [View all nine desktop and mobile themes](https://github.com/yanke7/Home-Assistant-Network/blob/main/docs/theme-gallery.md)
