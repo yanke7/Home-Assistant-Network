@@ -1394,8 +1394,7 @@ summary {
 }
 .shell[data-theme="trek"] header {
   padding:0 8px 0 14px;
-  border-inline-start:12px solid var(--yanke-accent);
-  border-radius:24px 3px 3px 0;
+  border-inline-start:0;
 }
 .shell[data-theme="trek"] #dashboard-title {
   margin-inline-start:0;
