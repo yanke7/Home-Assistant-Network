@@ -12,6 +12,27 @@ https://github.com/user-attachments/assets/4cfd890a-ab76-42b4-b8be-fc31e116d012
 
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
 
+## Dashboard features
+
+| Section | What you can see and do |
+| --- | --- |
+| **Internet speed** | See the latest download, upload, and ping. Run the built-in Speedtest on demand, schedule it at an adjustable interval, or connect your existing speed-test entities. The default schedule is hourly. |
+| **Connection history** | Compare speed and latency over the last 24 hours using Home Assistant Recorder. Adjust the latency limit to keep unusually high readings from flattening the chart. Use **Refresh history** to reload readings or **Connection snapshot** to get a copyable summary. |
+| **Host health** | Monitor CPU usage, RAM, free disk space, CPU temperature where supported, and uptime. Hover over a history graph for the exact reading and time. Built-in sensors collect readings every minute, and the visual editor can use existing sensors for any metric. |
+| **Network scanner** | Pair with Nmap Tracker to see online, dropped, unnamed, and newly discovered devices. Search by name, IP, MAC, or vendor. Use the **Activity** tab for recent joins and drops. Admins can name devices and use **Track** or **Track all** to enable discovered trackers. |
+| **Personal devices** | Discover Home Assistant people and Companion App battery and storage readings automatically, or choose which entities to display. Select a reading to open its Home Assistant details. |
+| **Printer supplies** | Show available ink or toner levels from IPP or compatible sensors. The panel can appear automatically when supply sensors are present. |
+| **DNS and ad blocking** | See query counts and blocked percentages from Pi-hole or AdGuard Home. Configure a five-minute pause using the Pi-hole switch or the AdGuard script blueprint. |
+| **Remote access and SSL** | Display a VPN or remote-access status entity and a certificate expiry sensor from your Home Assistant setup. |
+| **Network controls** | Keep shortcuts for connection snapshots, history refresh, device search, recent activity, and on-demand speed tests. Add compatible controls for router reboot, guest Wi-Fi, Wake-on-LAN, Home Assistant restart, and host reboot. You can also add Home Assistant buttons, scripts, and switches. |
+
+- **Dashboard configuration.** Use the visual editor to map entities, change the heading, and set sections to **Automatic**, **Always show**, or **Hide**. On a supported storage-mode panel view, use **Manage** on Personal devices and Network controls to save selections to the dashboard so they carry across devices.
+- **Network privacy.** Set a router label or show the WAN address in the header. Public WAN IP and scanner MAC display are opt-in.
+- **Desktop and mobile themes.** Pick from nine options in **Settings → Theme**, including Star Trek, Mac Control, and Follow Appearance. The layout adapts to phone and desktop widths.
+- **11 languages.** The dashboard and its visual editor follow your Home Assistant profile by default, with English as the fallback. Use **Settings → Language** to select a language manually.
+
+See [automation examples](#what-can-you-automate) for notifications and scheduled tests, or check [optional integrations and controls](#optional-integrations-and-controls) for the entities that power each panel.
+
 ## Dashboard screenshots
 
 All screenshots use fictional devices and sample readings.
@@ -108,12 +129,6 @@ All screenshots use fictional devices and sample readings.
 
 [View all nine desktop and mobile themes](https://github.com/yanke7/Home-Assistant-Network/blob/main/docs/theme-gallery.md)
 
-## Why use Network Control?
-
-- **Find out what slowed down.** Compare built-in Speedtest results and ping history with the host’s CPU, memory, disk space, temperature, and uptime. Install Network Control to start collecting speed and host readings.
-- **See what’s on your network.** Pair it with Nmap Tracker to see which devices are online, review recent activity, and spot newly discovered devices waiting to be tracked.
-- **Keep useful controls close by.** Run a speed test, find a device, or open a connection snapshot from the dashboard. You can also add Home Assistant buttons, scripts, and switches for controls your other integrations expose.
-
 ## What can you automate?
 
 | I want to… | How it works |
@@ -122,6 +137,15 @@ All screenshots use fictional devices and sample readings.
 | Know when my internet slows down | Send an alert when the built-in download sensor falls below a threshold you choose. |
 | Compare speeds at a consistent time | Press the built-in speed-test button from a time-based automation. The dashboard also supports an adjustable automatic test interval. |
 | Catch sustained load on my Home Assistant host | Alert when the built-in CPU sensor stays above your threshold for several minutes. |
+
+Use these entities in Home Assistant automation triggers, conditions, and actions. If you renamed an entity, use its current ID.
+
+| Built-in entity | Automation use |
+| --- | --- |
+| `event.network_control_new_device` | Trigger on a first-time Nmap Tracker discovery and use the reported device name and tracker ID in a notification. |
+| `sensor.network_control_download`, `sensor.network_control_upload`, `sensor.network_control_ping` | Trigger when speed or latency crosses a threshold. |
+| `button.network_control_run_speed_test` | Run a measurement from an automation or script. |
+| Network Control host sensors | Trigger on CPU load, RAM usage, low disk space, or high temperature. Use the boot-time sensor to check when the host restarted. |
 
 The guide has ready-to-copy YAML for all four examples. You can also open it from **Settings → Automation examples** in the dashboard. [View automation examples](docs/automations.md)
 
