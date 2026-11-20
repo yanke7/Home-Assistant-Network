@@ -8,7 +8,7 @@ Network Control is a Home Assistant network monitoring dashboard for checking in
 
 https://github.com/user-attachments/assets/4cfd890a-ab76-42b4-b8be-fc31e116d012
 
-[Watch or download the MP4](https://github.com/yanke7/Home-Assistant-Network/releases/download/v1.20.2/network-explainer.mp4) to see the dashboard, supported integrations, example automations, and language settings.
+[Download the MP4](https://github.com/yanke7/Home-Assistant-Network/releases/download/v1.20.2/network-explainer.mp4) or [watch on GitHub](https://github.com/yanke7/Home-Assistant-Network#watch-the-30-second-overview) to see the dashboard, supported integrations, example automations, and language settings.
 
 [![Open in Home Assistant Marketplace or HACS](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yanke7&repository=Home-Assistant-Network&category=integration)
 
