@@ -1,7 +1,7 @@
 """Expose new network discoveries to Home Assistant automations."""
 from homeassistant.components.event import EventEntity
 from homeassistant.core import callback
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -40,11 +40,19 @@ class NewNetworkDevice(EventEntity):
         other = "nmap_tracker" if entry.platform == "network_control" else "network_control"
         if registry.async_get_entity_id("device_tracker", other, entry.unique_id.lower()):
             return
+        name = entry.name
+        if name is None and entry.platform == "network_control":
+            devices = dr.async_get(self.hass).async_get_devices(
+                connections={(dr.CONNECTION_NETWORK_MAC, entry.unique_id.lower())}
+            )
+            name = next((device.name_by_user for device in devices if device.name_by_user), None)
+            if name is None:
+                name = next((device.name for device in devices if device.name), None)
         self._trigger_event(
             "device_discovered",
             {
                 "discovered_entity_id": entity_id,
-                "device_name": entry.name or entry.original_name or entity_id,
+                "device_name": name or entry.original_name or entity_id,
             },
         )
         self.async_write_ha_state()
