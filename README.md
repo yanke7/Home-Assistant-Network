@@ -19,7 +19,7 @@ https://github.com/user-attachments/assets/4cfd890a-ab76-42b4-b8be-fc31e116d012
 | **Internet speed** | See the latest download, upload, and ping. Run the built-in Speedtest on demand, schedule it at an adjustable interval, or connect your existing speed-test entities. The default schedule is hourly. |
 | **Connection history** | Compare speed and latency over the last 24 hours using Home Assistant Recorder. Adjust the latency limit to keep unusually high readings from flattening the chart. Use **Refresh history** to reload readings or **Connection snapshot** to get a copyable summary. |
 | **Host health** | Monitor CPU usage, RAM, free disk space, CPU temperature where supported, and uptime. Hover over a history graph for the exact reading and time. Built-in sensors collect readings every minute, and the visual editor can use existing sensors for any metric. |
-| **Network scanner** | Pair with Nmap Tracker to see online, dropped, unnamed, and newly discovered devices. Search by name, IP, MAC, or vendor. Use the **Activity** tab for recent joins and drops. Admins can name devices and use **Track** or **Track all** to enable discovered trackers. |
+| **Network scanner** | See locally observed and newly discovered devices with built-in discovery. Existing Nmap Tracker entities also work. Search by name, IP, MAC, or vendor. Use the **Activity** tab for recent joins and drops. Admins can name devices and use **Track** or **Track all** to enable discovered trackers. |
 | **Personal devices** | Discover Home Assistant people and Companion App battery and storage readings automatically, or choose which entities to display. Select a reading to open its Home Assistant details. |
 | **Printer supplies** | Show available ink or toner levels from IPP or compatible sensors. The panel can appear automatically when supply sensors are present. |
 | **DNS and ad blocking** | See query counts and blocked percentages from Pi-hole or AdGuard Home. Configure a five-minute pause using the Pi-hole switch or the AdGuard script blueprint. |
@@ -97,7 +97,7 @@ All screenshots use fictional devices and sample readings.
 
 | I want to… | How it works |
 | --- | --- |
-| Get a phone alert when a new device joins my network | Trigger a notification when Network Control reports a first-time Nmap Tracker discovery. The alert can include the device name and tracker ID. |
+| Get a phone alert when a new device joins my network | Trigger a notification when Network Control reports a first-time device discovery. The alert can include the device name and tracker ID. |
 | Know when my internet slows down | Send an alert when the built-in download sensor falls below a threshold you choose. |
 | Compare speeds at a consistent time | Press the built-in speed-test button from a time-based automation. The dashboard also supports an adjustable automatic test interval. |
 | Catch sustained load on my Home Assistant host | Alert when the built-in CPU sensor stays above your threshold for several minutes. |
@@ -106,7 +106,7 @@ Use these entities in Home Assistant automation triggers, conditions, and action
 
 | Built-in entity | Automation use |
 | --- | --- |
-| `event.network_control_new_device` | Trigger on a first-time Nmap Tracker discovery and use the reported device name and tracker ID in a notification. |
+| `event.network_control_new_device` | Trigger on a first-time device discovery and use the reported device name and tracker ID in a notification. |
 | `sensor.network_control_download`, `sensor.network_control_upload`, `sensor.network_control_ping` | Trigger when speed or latency crosses a threshold. |
 | `button.network_control_run_speed_test` | Run a measurement from an automation or script. |
 | Network Control host sensors | Trigger on CPU load, RAM usage, low disk space, or high temperature. Use the boot-time sensor to check when the host restarted. |
@@ -151,9 +151,13 @@ latency_max_ms: 500
 
 The built-in speed test runs every 60 minutes by default. To change it, open **Settings** on the dashboard, enter an interval under **Automatic speed tests**, and select **Save interval**. You can also change it in **Settings → Devices & services → Network Control → Configure**. Enter **0** to disable automatic tests. Saving starts a new interval. **Run speed test** remains available for on-demand measurements.
 
+## Built-in device discovery
+
+Network Control checks the Home Assistant host’s IPv4 neighbor table every 30 seconds on Linux. No separate tracker integration is needed. The host must be able to see the devices on its local network, such as when Home Assistant Container uses host networking. Devices across routed networks or clients that never appear in the host’s neighbor table may be missed. The dashboard uses recent neighbor observations as a presence estimate. The first run can report devices already present on the network if Network Control hasn’t registered them before. Nmap Tracker remains optional for setups that need active discovery.
+
 ## Get alerts for new network devices
 
-The scanner’s **New devices** tab lists Nmap Tracker discoveries awaiting tracking. **Track** moves them into the tracked list.
+The scanner’s **New devices** tab lists discoveries awaiting tracking. **Track** moves them into the tracked list.
 
 To get an alert, create an automation with a **State** trigger for `event.network_control_new_device`. Use the YAML below to include the first discovery and ignore restoration of older events.
 
@@ -171,7 +175,7 @@ conditions:
          and (now() - as_datetime(trigger.to_state.state)).total_seconds() < 30 }}
 ```
 
-Add your preferred notification action. Use `{{ trigger.to_state.attributes.device_name }}` for the name and `{{ trigger.to_state.attributes.discovered_entity_id }}` for the tracker entity ID. Alerts fire on first registration by Nmap Tracker. A device reconnecting or being renamed won’t trigger an alert.
+Add your preferred notification action. Use `{{ trigger.to_state.attributes.device_name }}` for the name and `{{ trigger.to_state.attributes.discovered_entity_id }}` for the tracker entity ID. Alerts fire on first registration by built-in discovery or Nmap Tracker. A device reconnecting or being renamed won’t trigger an alert.
 
 ## Optional integrations and controls
 
@@ -180,7 +184,7 @@ Everything below is optional. A section appears automatically when Home Assistan
 | Feature | Provider and configuration |
 | --- | --- |
 | Speed and history | **Run speed test** uses Network Control’s built-in tester from the Home Assistant host. It contacts Speedtest.net on demand and records download, upload and ping in [Recorder](https://www.home-assistant.io/integrations/recorder/). The separate Speedtest.net integration is optional for existing setups. Configure all three sensors and a button or script if you use another provider. |
-| Device presence | [Nmap Tracker](https://www.home-assistant.io/integrations/nmap_tracker/) for your own LAN. Admin users can enable newly discovered trackers and rename devices. [Person](https://www.home-assistant.io/integrations/person/) and Companion App battery/storage sensors populate Personal devices. |
+| Device presence | Built-in IPv4 neighbor discovery or optional [Nmap Tracker](https://www.home-assistant.io/integrations/nmap_tracker/). Admin users can enable newly discovered trackers and rename devices. [Person](https://www.home-assistant.io/integrations/person/) and Companion App battery/storage sensors populate Personal devices. |
 | WAN and printer | A router external IP sensor and [IPP](https://www.home-assistant.io/integrations/ipp/) or equivalent supply sensors. Use the config keys above when entity names differ. WAN IP and MAC display are opt-in. Set `show_mac: true` to display scanner MAC addresses. |
 | Host health | Network Control samples CPU, RAM, disk free space, CPU temperature, and uptime every minute. Disk free space refers to the filesystem containing the Home Assistant configuration. Temperature requires a CPU sensor exposed to Home Assistant. Recorder provides the history. Set `cpu_sensor`, `memory_sensor`, `disk_sensor`, `temperature_sensor` or `uptime_sensor` to use your own sensor for any reading. |
 | DNS | [Pi-hole](https://www.home-assistant.io/integrations/pi_hole/) or [AdGuard Home](https://www.home-assistant.io/integrations/adguard/). AdGuard reports its configured statistics window. Override discovery with `dns_queries_sensor` and `dns_blocked_sensor`. Set `pihole_switch` to the Pi-hole switch for a native five-minute pause. |

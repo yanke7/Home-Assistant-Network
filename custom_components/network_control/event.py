@@ -1,4 +1,4 @@
-"""Expose new Nmap Tracker discoveries to Home Assistant automations."""
+"""Expose new network discoveries to Home Assistant automations."""
 from homeassistant.components.event import EventEntity
 from homeassistant.core import callback
 from homeassistant.helpers import entity_registry as er
@@ -10,7 +10,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class NewNetworkDevice(EventEntity):
-    """Emit one event when Nmap Tracker registers a device tracker."""
+    """Emit one event when discovery registers a device tracker."""
 
     _attr_name = "Network Control New Device"
     _attr_suggested_object_id = "network_control_new_device"
@@ -33,8 +33,12 @@ class NewNetworkDevice(EventEntity):
         entity_id = event.data["entity_id"]
         if not entity_id.startswith("device_tracker."):
             return
-        entry = er.async_get(self.hass).async_get(entity_id)
-        if entry is None or entry.platform != "nmap_tracker":
+        registry = er.async_get(self.hass)
+        entry = registry.async_get(entity_id)
+        if entry is None or entry.platform not in {"network_control", "nmap_tracker"}:
+            return
+        other = "nmap_tracker" if entry.platform == "network_control" else "network_control"
+        if registry.async_get_entity_id("device_tracker", other, entry.unique_id.lower()):
             return
         self._trigger_event(
             "device_discovered",

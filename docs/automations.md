@@ -4,7 +4,7 @@ Create an automation in Home Assistant, open **Edit in YAML**, and paste an exam
 
 ## Alert when a new device is discovered
 
-Requires Nmap Tracker. Network Control reports the first time Nmap Tracker registers a device.
+Network Control reports the first registration of a device detected by built-in discovery or optional Nmap Tracker.
 
 ```yaml
 alias: Alert on a new network device

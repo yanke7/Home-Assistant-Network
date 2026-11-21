@@ -205,6 +205,7 @@
     "DNS & ad blocking": ["DNS et blocage publicitaire", "DNS en advertentieblokkering", "DNS und Werbeblocker", "DNS y bloqueo de anuncios", "DNS at pagharang ng ad", "DNS och annonsblockering", "DNS e blocco annunci", "DNS i blokowanie reklam", "DNS og annonceblokering", "DNS og annonseblokkering"],
     "Remote access & SSL": ["Accès distant et SSL", "Externe toegang en SSL", "Fernzugriff und SSL", "Acceso remoto y SSL", "Malayuang access at SSL", "Fjärråtkomst och SSL", "Accesso remoto e SSL", "Dostęp zdalny i SSL", "Fjernadgang og SSL", "Fjerntilgang og SSL"],
   };
+  const scannerPlatforms = new Set(["network_control", "nmap_tracker"]);
   const themeKey = "network-control.theme";
   const speedDefaults = [
     "sensor.speedtest_download",
@@ -1179,7 +1180,8 @@
           shortcuts.push(["refresh", "Refresh history", "mdi:chart-timeline-variant"]);
       }
       const hasDevices = Object.keys(this.reg).length > 0 ||
-        Object.values(this._hass.entities || {}).some((entity) => entity.platform === "nmap_tracker");
+        Object.entries(this._hass.entities || {}).some(([id, entity]) =>
+          id.startsWith("device_tracker.") && scannerPlatforms.has(entity.platform));
       if (!this.sectionHidden("scanner", hasDevices)) {
         shortcuts.push(["find", "Find a device", "mdi:magnify"]);
         shortcuts.push(["activity", "Recent activity", "mdi:timeline-clock-outline"]);
@@ -1475,7 +1477,7 @@
         if (this.historyRequest === request) this.historyRequest = null;
       }
     }
-    /* ---------- Network scanner (Nmap Tracker entities) ---------- */
+    /* ---------- Network scanner ---------- */
     async loadRegistry() {
       if (this.mode("scanner") === "never") return;
       try {
@@ -1484,7 +1486,7 @@
         });
         const reg = {};
         all.forEach((e) => {
-          if (e.platform === "nmap_tracker") reg[e.entity_id] = e;
+          if (e.entity_id.startsWith("device_tracker.") && scannerPlatforms.has(e.platform)) reg[e.entity_id] = e;
         });
         this.reg = reg;
         this.regOk = true;
@@ -1500,9 +1502,11 @@
       for (const id in h.states)
         if (
           id.startsWith("device_tracker.") &&
-          h.entities?.[id]?.platform === "nmap_tracker"
+          scannerPlatforms.has(h.entities?.[id]?.platform)
         )
           ids.add(id);
+      const legacyMacs = new Set([...ids].filter(id => this.reg[id]?.platform === "nmap_tracker")
+        .map(id => String(h.states[id]?.attributes.mac || this.reg[id].unique_id).toLowerCase()));
       const macOwner = Object.create(null);
       for (const d of Object.values(h.devices || {}))
         for (const c of d.connections || [])
@@ -1510,6 +1514,8 @@
             (macOwner[c[1].toLowerCase()] =
               macOwner[c[1].toLowerCase()] || []).push(d);
       return [...ids]
+        .filter(id => this.reg[id]?.platform !== "network_control" ||
+          !legacyMacs.has(this.reg[id].unique_id.toLowerCase()))
         .map((id) => {
           const r = this.reg[id] || {},
             s = h.states[id],
@@ -1533,7 +1539,7 @@
           const suggested = other ? other.name_by_user || other.name : null;
           const custom =
             r.name ||
-            (h.entities?.[id]?.platform === "nmap_tracker" &&
+            (scannerPlatforms.has(h.entities?.[id]?.platform) &&
             !this.regOk &&
             a.friendly_name !== base
               ? a.friendly_name
@@ -1690,7 +1696,7 @@
         return;
       }
       if (!model.length) {
-        list.innerHTML = `<div class="none">${this.t(this.regOk === false ? "Device list could not be read." : "No Nmap Tracker devices yet. Add Nmap Tracker to populate this panel.")}</div>`;
+        list.innerHTML = `<div class="none">${this.t(this.regOk === false ? "Device list could not be read." : "No devices match this filter.")}</div>`;
         return;
       }
       list.innerHTML = rows.length

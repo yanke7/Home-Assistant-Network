@@ -11,9 +11,9 @@ from .speed_test import SpeedTest
 
 DOMAIN = "network_control"
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-PLATFORMS = [Platform.SENSOR, Platform.BUTTON, Platform.EVENT]
+PLATFORMS = [Platform.SENSOR, Platform.BUTTON, Platform.DEVICE_TRACKER]
 CARD_PATH = "/network_control/network-control.js"
-CARD_URL = f"{CARD_PATH}?v=1.20.4"
+CARD_URL = f"{CARD_PATH}?v=1.21.0"
 
 
 async def async_setup(hass, config):
@@ -30,6 +30,8 @@ async def async_setup(hass, config):
 async def async_setup_entry(hass, entry):
     """Load the card in the frontend."""
     entry.runtime_data = SpeedTest(hass)
+    # Subscribe to registry events before the scanner registers its first devices.
+    await hass.config_entries.async_forward_entry_setups(entry, [Platform.EVENT])
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await _update_schedule(hass, entry)
     entry.async_on_unload(entry.runtime_data.cancel_schedule)
@@ -47,7 +49,7 @@ async def _update_schedule(_hass, entry):
 
 async def async_unload_entry(hass, entry):
     """Remove the frontend module registration."""
-    if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+    if not await hass.config_entries.async_unload_platforms(entry, [Platform.EVENT, *PLATFORMS]):
         return False
     frontend.remove_extra_js_url(hass, CARD_URL)
     return True
