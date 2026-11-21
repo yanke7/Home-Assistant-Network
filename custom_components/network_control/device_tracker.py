@@ -56,17 +56,38 @@ async def async_setup_entry(hass, entry, async_add_entities):
         for entity in er.async_entries_for_config_entry(registry, entry.entry_id)
         if entity.domain == "device_tracker" and entity.platform == "network_control"
     }
-    def has_enabled_legacy_source(mac):
+    def legacy_tracker(mac):
         entity_id = registry.async_get_entity_id("device_tracker", "nmap_tracker", mac)
-        legacy = registry.async_get(entity_id) if entity_id else None
-        legacy_entry = hass.config_entries.async_get_entry(legacy.config_entry_id) if legacy and legacy.config_entry_id else None
+        return registry.async_get(entity_id) if entity_id else None
+
+    def has_enabled_legacy_source(mac):
+        legacy = legacy_tracker(mac)
+        if legacy is None or not legacy.config_entry_id:
+            return False
+        legacy_entry = hass.config_entries.async_get_entry(legacy.config_entry_id)
         return legacy_entry is not None and legacy_entry.disabled_by is None
+
+    def create_device(mac):
+        legacy = legacy_tracker(mac)
+        previously_tracked = legacy is not None and legacy.disabled_by == "config_entry"
+        return LocalDevice(mac, previously_tracked=previously_tracked)
+
+    for mac in devices:
+        legacy = legacy_tracker(mac)
+        if legacy is None or legacy.disabled_by != "config_entry":
+            continue
+        native_id = registry.async_get_entity_id("device_tracker", "network_control", mac)
+        native = registry.async_get(native_id) if native_id else None
+        if native is not None and native.disabled_by == "integration":
+            registry.async_update_entity(native.entity_id, disabled_by=None)
 
     initial = await hass.async_add_executor_job(read_neighbors)
     now = datetime.now(UTC)
     for mac, ip in (initial or {}).items():
         if mac in devices or not has_enabled_legacy_source(mac):
-            devices.setdefault(mac, LocalDevice(mac)).observe(ip, now)
+            if mac not in devices:
+                devices[mac] = create_device(mac)
+            devices[mac].observe(ip, now)
     async_add_entities(list(devices.values()))
 
     stopped = False
@@ -80,7 +101,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             if mac not in devices:
                 if has_enabled_legacy_source(mac):
                     continue
-                devices[mac] = LocalDevice(mac)
+                devices[mac] = create_device(mac)
                 added.append(devices[mac])
             devices[mac].observe(ip, now)
         if added:
@@ -104,7 +125,8 @@ class LocalDevice(ScannerEntity):
     _attr_should_poll = False
     _attr_entity_registry_enabled_default = False
 
-    def __init__(self, mac):
+    def __init__(self, mac, *, previously_tracked=False):
+        self._attr_entity_registry_enabled_default = previously_tracked
         self._attr_unique_id = mac
         self._attr_mac_address = mac
         self._attr_name = f"Network device {mac.replace(':', '')[-6:].upper()}"
