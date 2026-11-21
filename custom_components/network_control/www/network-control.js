@@ -1486,7 +1486,9 @@
         });
         const reg = {};
         all.forEach((e) => {
-          if (e.entity_id.startsWith("device_tracker.") && scannerPlatforms.has(e.platform)) reg[e.entity_id] = e;
+          if (e.entity_id.startsWith("device_tracker.") && scannerPlatforms.has(e.platform) &&
+              !(e.platform === "nmap_tracker" && e.disabled_by === "config_entry"))
+            reg[e.entity_id] = e;
         });
         this.reg = reg;
         this.regOk = true;
@@ -1505,8 +1507,11 @@
           scannerPlatforms.has(h.entities?.[id]?.platform)
         )
           ids.add(id);
-      const legacyMacs = new Set([...ids].filter(id => this.reg[id]?.platform === "nmap_tracker")
-        .map(id => String(h.states[id]?.attributes.mac || this.reg[id].unique_id).toLowerCase()));
+      const sourceFor = (id) => this.reg[id]?.platform || h.entities?.[id]?.platform;
+      const macFor = (id) => String(h.states[id]?.attributes.mac || this.reg[id]?.unique_id || "").toLowerCase();
+      const nativeMacs = new Set([...ids].filter(id => sourceFor(id) === "network_control").map(macFor));
+      const liveLegacyMacs = new Set([...ids].filter(id => sourceFor(id) === "nmap_tracker" &&
+        available(h.states[id])).map(macFor));
       const macOwner = Object.create(null);
       for (const d of Object.values(h.devices || {}))
         for (const c of d.connections || [])
@@ -1514,8 +1519,12 @@
             (macOwner[c[1].toLowerCase()] =
               macOwner[c[1].toLowerCase()] || []).push(d);
       return [...ids]
-        .filter(id => this.reg[id]?.platform !== "network_control" ||
-          !legacyMacs.has(this.reg[id].unique_id.toLowerCase()))
+        .filter(id => {
+          const mac = macFor(id);
+          if (!mac) return true;
+          if (sourceFor(id) === "network_control") return !liveLegacyMacs.has(mac);
+          return !nativeMacs.has(mac) || available(h.states[id]);
+        })
         .map((id) => {
           const r = this.reg[id] || {},
             s = h.states[id],
