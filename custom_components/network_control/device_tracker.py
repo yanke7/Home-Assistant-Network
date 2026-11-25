@@ -58,15 +58,20 @@ async def async_setup_entry(hass, entry, async_add_entities):
             continue
         mac = entity.unique_id
         device = device_registry.async_get(entity.device_id) if entity.device_id else None
-        if (
+        owner = getattr(device, "config_entry_id", None)
+        needs_name = (
             device is not None
-            and device.config_entries == {entry.entry_id}
+            and (owner == entry.entry_id if owner is not None
+                 else device.config_entries == {entry.entry_id})
             and not device.name_by_user
             and device.name in (None, "", "Network Control")
             and (CONNECTION_NETWORK_MAC, mac) in device.connections
-        ):
+        )
+        if needs_name:
             device_registry.async_update_device(device.id, name=local_device_name(mac))
-        devices[mac] = LocalDevice(mac, registered_device=device is not None)
+        devices[mac] = LocalDevice(
+            mac, registered_device=device is not None and not needs_name
+        )
 
     def legacy_tracker(mac):
         entity_id = registry.async_get_entity_id("device_tracker", "nmap_tracker", mac)
