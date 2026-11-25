@@ -3,6 +3,8 @@ from homeassistant.components.event import EventEntity
 from homeassistant.core import callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
+from .device_tracker import local_device_name
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """Expose an event entity for new network devices."""
@@ -47,7 +49,11 @@ class NewNetworkDevice(EventEntity):
             )
             name = next((device.name_by_user for device in devices if device.name_by_user), None)
             if name is None:
-                name = next((device.name for device in devices if device.name), None)
+                name = next(
+                    (device.name for device in devices
+                     if device.name and device.name != local_device_name(entry.unique_id)),
+                    None,
+                )
         self._trigger_event(
             "device_discovered",
             {
